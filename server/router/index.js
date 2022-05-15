@@ -34,13 +34,12 @@ router.post('/api/insert',(req, res) => {
 })
 
 router.get('/api/login', (req, res) => {
-    const test_id = req.query.id;
-    const test_pw = req.query.pw;
-    const User_id = 'KSH';
-    const User_pw = '1234';
-    console.log(test_id, test_pw);
+    const User_id = req.query.id;
+    const User_pw = req.query.pw;
+    //console.log(req.body.id,req.body.pw);
+    console.log(User_id, User_pw);
 
-    db.query("select count(*) as cnt from Member where User_id=? and User_pw=?", [User_id, User_pw], (err, rows)=>{
+    db.query('select count(*) as cnt from Member where User_id=? and User_pw=?', [User_id, User_pw], (err, rows)=>{
         if(!err){
             console.log(rows[0].cnt);
             console.log(User_id, User_pw);
@@ -90,6 +89,25 @@ router.post('/api/login2', (req, res) => {
         } 
         else {
             res.send(err)
+        }
+    })
+})
+
+router.post('/api/login3', (req, res) => {
+    console.log(req.body);
+    const User_id = req.body?.id;
+    const User_pw = req.body?.pw;
+    //console.log(req.body.id,req.body.pw);
+    console.log(User_id, User_pw);
+
+    db.query('select count(*) as cnt from Member where User_id=? and User_pw=?', [User_id, User_pw], (err, rows)=>{
+        if(!err){
+            console.log(rows[0].cnt);
+            console.log(User_id, User_pw);
+            res.send({rs : rows[0].cnt});
+        }
+        else{
+            res.send('error :'+ err);
         }
     })
 })

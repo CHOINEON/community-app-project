@@ -2,6 +2,10 @@ import './App.css';
 import React, { useState, useEffect } from 'react'
 import axios from 'axios';
 
+function Signup(){
+
+}
+
 function App(){
 
   const [inputId, setInputId] = useState(null);
@@ -41,19 +45,24 @@ function App(){
     });
   }
 
-  const onClickLogin = (event) =>{
-    event.preventDefualt();
-    console.log('click login');
+  const onClickLogin = (e) =>{
+    e.preventDefault();
+    console.log(1);
+    console.log(inputId,inputPw);
 
-    fetch('http://localhost:3001/api/login?id=?&pw=?', [inputId, inputPw])
+
+    fetch(`http://localhost:3001/api/login?id=${inputId}&pw=${inputPw}`)
     .then(res => {
       console.log(res);
+      console.log(typeof(res));
       return res.json();
     })
     .then(data => setLoginRs(data.rs));
   }
 
+
   const onClickLogin2 = (e) =>{
+    e.preventDefault();
     axios.post('http://localhost:3001/api/login2', null, {
       params: {
         'User_id': inputId,
@@ -86,6 +95,31 @@ function App(){
     .catch();
   }
 
+
+  let obj = {'id':inputId,'pw':inputPw};
+  
+  const onClickLogin3 = (e) =>{
+    e.preventDefault();
+    console.log(3);
+    console.log(inputId,inputPw);
+
+    fetch('http://localhost:3001/api/login3',{
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({
+        id: inputId,
+        pw: inputPw
+      }),
+    })
+    .then(res => {
+      console.log(res);
+      return res.json();
+    })
+    .then(data => setLoginRs(data.rs));
+  }
+
   const idChange = (e) =>{
     setInputId(e.target.value);
   }
@@ -96,18 +130,20 @@ function App(){
   
   return(
     <div>
-      <h2>Hello world</h2>
-      <button>btnn</button>
-      <button onClick={getServerData}>btn</button>
-      <button onClick={getServerData2}>btn2</button>
+      <h2>React Test</h2>
+      <button>btn</button>
+      <button onClick={getServerData}>btn2</button>
+      <button onClick={getServerData2}>btn3</button>
       <div>
         <h2>로그인 테스트</h2>
-        <form action='/login' onSubmit={onClickLogin}>
+        <form action='/api/login' onSubmit={onClickLogin3} >
           <input type='text' name='id' placeholder = '아이디를 입력해주세요' onChange={idChange}/>
           <input type='password' name='pw' placeholder='비밀번호를 입력해주세요' onChange={pwChange}/>
           <input type='submit' value='로그인'/>
+          <input type='submit' value='로그인3'/>
         </form>
         <button onClick={onClickLogin2}>로그인2</button>
+        <button onClick={onClickLogin3}>로그인3</button>
       </div>
     </div>
   )

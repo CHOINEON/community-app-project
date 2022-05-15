@@ -1,13 +1,15 @@
 const express = require('express');
-const app = express();
+const bodyParser = require('body-parser');
 const router = require('./router/index.js');
 const cors = require('cors');
 const request = require('request');
-const bodyParser = require('body-parser');
 
+
+const app = express();
+app.use(bodyParser.json());
 app.use(cors());
 app.use('/', router);
-app.use(bodyParser.json());
+
 
 const port = 3001;
 app.listen(port, ()=>{
