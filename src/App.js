@@ -28,7 +28,7 @@ function App(){
 
   const getServerData2 = () =>{
 
-    fetch('http://localhost:3001/getData',{
+    fetch('http://3.90.201.108:3001/getData',{
       method : 'GET',
       headers : {'Content-Type' : 'application/json'}
     })
@@ -51,7 +51,7 @@ function App(){
     console.log(inputId,inputPw);
 
 
-    fetch(`http://localhost:3001/api/login?id=${inputId}&pw=${inputPw}`)
+    fetch(`http://3.90.201.108:3001/api/login?id=${inputId}&pw=${inputPw}`)
     .then(res => {
       console.log(res);
       console.log(typeof(res));
@@ -63,10 +63,10 @@ function App(){
 
   const onClickLogin2 = (e) =>{
     e.preventDefault();
-    axios.post('http://localhost:3001/api/login2', null, {
+    axios.post('http://3.90.201.108:3001/api/login2', null, {
       params: {
-        'User_id': inputId,
-        'User_pw': inputPw
+        'id': inputId,
+        'pw': inputPw
       }
     })
     .then((res)=>{
@@ -103,7 +103,7 @@ function App(){
     console.log(3);
     console.log(inputId,inputPw);
 
-    fetch('http://localhost:3001/api/login3',{
+    fetch('http://3.90.201.108:3001/api/login3',{
       method: 'POST',
       headers: {
         'Content-Type' : 'application/json;charset=utf-8'
@@ -130,17 +130,16 @@ function App(){
   
   return(
     <div>
-      <h2>React Test</h2>
+      <h2>DB Test</h2>
       <button>btn</button>
       <button onClick={getServerData}>btn2</button>
       <button onClick={getServerData2}>btn3</button>
       <div>
         <h2>로그인 테스트</h2>
-        <form action='/api/login' onSubmit={onClickLogin3} >
+        <form action='/api/login' onSubmit={onClickLogin} >
           <input type='text' name='id' placeholder = '아이디를 입력해주세요' onChange={idChange}/>
           <input type='password' name='pw' placeholder='비밀번호를 입력해주세요' onChange={pwChange}/>
           <input type='submit' value='로그인'/>
-          <input type='submit' value='로그인3'/>
         </form>
         <button onClick={onClickLogin2}>로그인2</button>
         <button onClick={onClickLogin3}>로그인3</button>

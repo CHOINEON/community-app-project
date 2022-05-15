@@ -37,12 +37,13 @@ router.get('/api/login', (req, res) => {
     const User_id = req.query.id;
     const User_pw = req.query.pw;
     //console.log(req.body.id,req.body.pw);
-    console.log(User_id, User_pw);
+    console.log('로그인1');
+    console.log(req.query);
 
     db.query('select count(*) as cnt from Member where User_id=? and User_pw=?', [User_id, User_pw], (err, rows)=>{
         if(!err){
             console.log(rows[0].cnt);
-            console.log(User_id, User_pw);
+            console.log();
             res.send({rs : rows[0].cnt});
         }
         else{
@@ -54,9 +55,10 @@ router.get('/api/login', (req, res) => {
 router.post('/api/login2', (req, res) => {
     //console.log(`= = = > req : ${util.inspect(req)}`)
 
-    const User_id = req.query.User_id;
-    const User_pw = req.query.User_pw;
-    console.log(User_id, User_pw);
+    const User_id = req.query.id;
+    const User_pw = req.query.pw;
+    console.log('로그인2');
+    console.log(req.query);
 
     const sqlLogin = 'select count(*) as result from Member where User_id = ? and User_pw = ?'
     db.query(sqlLogin, [User_id, User_pw], (err, data) => {
@@ -94,16 +96,16 @@ router.post('/api/login2', (req, res) => {
 })
 
 router.post('/api/login3', (req, res) => {
+    console.log('로그인3');
     console.log(req.body);
     const User_id = req.body?.id;
     const User_pw = req.body?.pw;
     //console.log(req.body.id,req.body.pw);
-    console.log(User_id, User_pw);
 
     db.query('select count(*) as cnt from Member where User_id=? and User_pw=?', [User_id, User_pw], (err, rows)=>{
         if(!err){
             console.log(rows[0].cnt);
-            console.log(User_id, User_pw);
+            console.log();
             res.send({rs : rows[0].cnt});
         }
         else{
