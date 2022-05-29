@@ -114,6 +114,66 @@ router.post('/api/login3', (req, res) => {
     })
 })
 
+router.get('/api/getSimilarPost', (req, res) => {
+    console.log('질문 유사도 검사');
+    
+    const pythonShell = require('python-shell');
+    var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: ['title', 'content', 'url']
+    };
+    
+    pythonShell.PythonShell.run('OKKY_C++_cosine_similarity.py', options, (err, results) => {
+    if (err) throw err;
+    
+    console.log(results);
+    res.send(results);
+    });
+})
+
+router.get('/api/getCsv', (req, res) => {
+    console.log('csv 파일 테스트');
+    
+    var question = 'C++ vector';        // 사용자의 질문(임의로 만듬)
+    question = question + ',' + ',' + '\n';  // csv형식에 맞게 변형
+    console.log(question);
+    
+    const fs = require('fs');
+    
+    fs.readFile('OKKY C++ utf8.csv', 'utf8', (err, data) => {  // csv 파일 읽어옴
+        if(err) throw err;
+        console.log('csv read');
+        var dataArray = data.split(/\r?\n/);
+        //console.log(dataArray[1]);
+        
+        dataArray.splice(1, 0, question);  // csv 파일에 사용자의 질문 추가
+        //console.log(dataArray[1]);
+        
+        var dataStr = '';
+        for (var i in dataArray){  // csv 파일에 맞게 string 형태로 만듬
+            dataStr = dataStr + dataArray[i] + '\n';
+            if(i<5){
+              console.log(dataStr);
+            }
+        }
+        
+        res.send(dataStr);
+        
+        fs.writeFileSync('OKKY C++ utf8 added.csv', dataStr);  // csv 파일 쓰기
+        
+    })
+    
+    
+    //res.send('end');
+})
+
+
+
+
+
 router.post('/api/android/login', (req, res) => {
     console.log('안드로이드 로그인');
     console.log(req.body);

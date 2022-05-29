@@ -46,7 +46,7 @@ def top10_indices(data, q_num):
     return tag_indices
 
 with tf.device('/cpu:0'):
-    okky_data = pd.read_csv(r'OKKY C++.csv', encoding = "cp949", low_memory = False)
+    okky_data = pd.read_csv(r'OKKY C++ utf8 added.csv', encoding = "utf8", low_memory = False)
     
 
     tfidf_gen = TfidfVectorizer() #일반적인 방식
