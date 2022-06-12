@@ -1,10 +1,12 @@
 # -*- coding: cp949 -*-
+import os
+import time
+start = time.time()  # start time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from konlpy.tag import Okt
 from konlpy.tag import Mecab
 import pandas as pd
-import os 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 import getpass
@@ -12,8 +14,6 @@ import numpy as np
 from numpy import dot
 from numpy.linalg import norm
 import matplotlib
-import time
-start = time.time()  # start time
 
 #dataframe에 null값이 있는 경우 공백을 넣어 null값 제거
 def avoid_null(data, header):
@@ -38,29 +38,36 @@ def tfidf(dataframe, TfidfVectorizer):
 def top10_indices(data, q_num):
     #입력된 데이터의 코사인유사도 계산
     cos_sim = linear_kernel(data, data)
+    #print(cos_sim)
 
     cos_sim_score = list(enumerate(cos_sim[q_num])) 
     cos_sim_score = sorted(cos_sim_score, key = lambda x : x[1], reverse = True)
-    #상위 10개 항목을 가져옴
-    score = cos_sim_score[1:11]
+    #print(cos_sim_score)
+    #상위 5개 항목을 가져옴
+    score = cos_sim_score[1:6]
     tag_indices = [i[0] for i in score]
+    #print(tag_indices)
 
     return tag_indices
 
 with tf.device('/cpu:0'):
-    okky_data = pd.read_csv('/home/ksh/node-project/server/OKKY C++ utf8 added.csv', encoding = "utf8", low_memory = False)
-    
+    data = pd.read_csv('/home/ksh/node-project/server/userQuestionAndDBdata.csv', encoding = "utf8", low_memory = False)
+    #print(data)
 
     tfidf_gen = TfidfVectorizer() #일반적인 방식
 
-    #ti-idf를 계산하여 title과 content 열의 값을 각각 받아옴
-    data_tit = tfidf(okky_data, tfidf_gen) 
+    #ti-idf를 계산하여 title 값을 받아옴
+    data_tit = tfidf(data, tfidf_gen)
+    #print(data_tit)
 
     for i in range(1):
-        print(i, '/', len(okky_data))
-        #질문 제목과 데이터셋의 유사도를 10위까지 가져옴
-        tit_10_q = okky_data['title'].iloc[top10_indices(data_tit, i)]
-        print(str(i),"번 질문 제목 : ", okky_data.title[i])
-        print(str(i),"번 질문과 유사한 제목을 가진 질문목록\n", tit_10_q) 
+        #print(i, '/', len(data))
+        #질문 제목과 데이터셋의 유사도를 5위까지 가져옴
+        tag_indices = top10_indices(data_tit, i)
+        print("사용자의 질문  : ", data.title[i])
+        print("사용자의 질문과 유사한 제목을 가진 질문목록\n")
+        for j in range(5):
+            print(data['bid'].iloc[tag_indices[j]], data['title'].iloc[tag_indices[j]])
+           
     
     print("python runtime :", time.time() - start)  # current time - start time

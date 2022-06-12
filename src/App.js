@@ -12,6 +12,8 @@ function App(){
   const [inputPw, setInputPw] = useState(null);
   const [loginRs, setLoginRs] = useState(null);
 
+  const [inputTitle, setInputTitle] = useState(null);
+
   const getServerData = () =>{
 
     fetch('http://localhost:3001/group',{
@@ -120,6 +122,28 @@ function App(){
     .then(data => setLoginRs(data.rs));
   }
 
+  const onClickExpectedAnswer = (e) =>{
+    e.preventDefault();
+    console.log(inputTitle);
+
+    fetch('http://3.90.201.108:3001/api/expectedAnswer',{
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({
+        title: inputTitle
+      }),
+    })
+    .then(res => {
+      console.log(res);
+      return res.json();
+    })
+    .then(data =>{
+      console.log(data);
+    });
+  }
+
   const idChange = (e) =>{
     setInputId(e.target.value);
   }
@@ -127,10 +151,14 @@ function App(){
   const pwChange = (e) =>{
     setInputPw(e.target.value);
   }
+
+  const titleChange = (e) =>{
+    setInputTitle(e.target.value);
+  }
   
   return(
     <div>
-      <h2>DB Test</h2>
+      {/* <h2>DB Test</h2>
       <button>btn</button>
       <button onClick={getServerData}>btn2</button>
       <button onClick={getServerData2}>btn3</button>
@@ -143,7 +171,13 @@ function App(){
         </form>
         <button onClick={onClickLogin2}>로그인2</button>
         <button onClick={onClickLogin3}>로그인3</button>
-      </div>
+      </div> */}
+
+      <h2>예상 답변 테스트</h2>
+      <form action='/api/expectdAnswer'>
+        <input type='text' name='title' placeholder='질문을 입력해주세요' onChange={titleChange}/>
+      </form>
+      <button onClick={onClickExpectedAnswer}>예상 답변 확인하기</button>
     </div>
   )
 }

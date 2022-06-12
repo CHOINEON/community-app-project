@@ -116,6 +116,7 @@ router.post('/api/login3', (req, res) => {
 
 router.get('/api/getSimilarPost', (req, res) => {
     console.log('질문 유사도 검사');
+    console.time('node runtime');
     
     const pythonShell = require('python-shell');
     var options = {
@@ -125,11 +126,12 @@ router.get('/api/getSimilarPost', (req, res) => {
         scriptPath: '',
         args: ['title', 'content', 'url']
     };
-    
-    pythonShell.PythonShell.run('OKKY_C++_cosine_similarity.py', options, (err, results) => {
+  
+    pythonShell.PythonShell.run('/home/ksh/node-project/server/cosine_similarity_test.py', options, (err, results) => {
     if (err) throw err;
     
     console.log(results);
+    console.timeEnd('node runtime');
     res.send(results);
     });
 })
@@ -143,22 +145,23 @@ router.get('/api/getCsv', (req, res) => {
     
     const fs = require('fs');
     
-    fs.readFile('OKKY C++ utf8.csv', 'utf8', (err, data) => {  // csv 파일 읽어옴
+    fs.readFile('/home/ksh/node-project/server/OKKY C++ utf8.csv', 'utf8', (err, data) => {  // csv 파일 읽어옴
         if(err) throw err;
         console.log('csv read');
         var dataArray = data.split(/\r?\n/);
         //console.log(dataArray[1]);
         
         dataArray.splice(1, 0, question);  // csv 파일에 사용자의 질문 추가
-        //console.log(dataArray[1]);
+        console.log(dataArray[1]);
         
         var dataStr = '';
         for (var i in dataArray){  // csv 파일에 맞게 string 형태로 만듬
             dataStr = dataStr + dataArray[i] + '\n';
-            if(i<5){
+            if(i<2){
               console.log(dataStr);
             }
         }
+        
         
         res.send(dataStr);
         
@@ -170,7 +173,138 @@ router.get('/api/getCsv', (req, res) => {
     //res.send('end');
 })
 
+router.get('/api/CSVToDB', (req, res) => {
+    console.log('csv to DB');
+    const fs = require('fs');
+    const csv = require('csv-parser');
+    const dataArray = [];
+    
+    fs.createReadStream('/home/ksh/node-project/server/OKKY C++ utf8.csv')
+          .pipe(csv({delimiter: ','}))
+          .on("data", (row) => {
+            dataArray.push(row);
+          })
+          .on("end", () => {
+          
+            // 중복 제거
+            for(var i in dataArray){
+              const iTitle = dataArray[i]["title"];
+              for(var j = 0;j < i;j++){
+                const jTitle = dataArray[j]["title"];
+                if(iTitle === jTitle){
+                  dataArray.splice(j, 1);
+                }
+              }
+            }
+            
+            // db로 옮기기
+            var contentMax = 0;
+            var titleMax = 0;
+            for(var i in dataArray){
+              const title = dataArray[i]["title"];
+              const content = dataArray[i]["content"];
+              // max size 체크
+              if(contentMax<content.length){
+                contentMax = content.length;
+              }
+              if(titleMax<title.length){
+                titleMax = title.length;
+              }
+              
+              db.query('insert into board (title, content)values (?,?)', [title, content], (err, rows)=>{
+                if(!err){
+                }
+                else{
+                  console.log(err);
+                }
+              });
+            }
+            
+            console.log(dataArray);
+            res.send(dataArray);
+            
+            console.log(titleMax);
+            console.log(contentMax);
+        });
+})
 
+
+router.post('/api/expectedAnswer',(req, res) => {
+    console.time('node runtime');
+    const title = req.body.title;
+    console.log(title);
+    fs = require('fs');
+    
+    var DBdata = [];
+    db.query('select bid, title from board', (err, rows) =>{
+      DBdata = rows.map(v => Object.assign({}, v));
+      //console.log(DBdata[0].title);
+      
+      var userQ = {
+        bid : 0,
+        title : title
+      }
+      //console.log(userQ);
+      
+      DBdata.unshift(userQ);
+      //console.log(DBdata);
+      
+      const { parse, Parser} = require('json2csv');
+      const fields = ['bid', 'title'];
+      const csv_string = parse(DBdata, { fields });
+      
+      //console.log(csv_string);
+      fs.writeFileSync('/home/ksh/node-project/server/userQuestionAndDBdata.csv', csv_string);
+      
+      console.log('질문 유사도 검사');
+    
+      const pythonShell = require('python-shell');
+      var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: ['title', 'content', 'url']
+      };
+    
+      pythonShell.PythonShell.run('/home/ksh/node-project/server/cosine_similarity_test.py', options, (err, results) => {
+      if (err) throw err;
+    
+      var postIndex = [];
+      for(var i=2;i<7;i++){
+        resultSplit = results[i].split(' ');
+        postIndex.push(resultSplit[0]);
+      }
+      console.log(postIndex);
+      
+      var sql1 = `select title, content from board where bid = ${postIndex[0]};`;
+      var sql2 = `select title, content from board where bid = ${postIndex[1]};`;
+      var sql3 = `select title, content from board where bid = ${postIndex[2]};`;
+      var sql4 = `select title, content from board where bid = ${postIndex[3]};`;
+      var sql5 = `select title, content from board where bid = ${postIndex[4]};`;
+      
+      var queryResult = [];
+      db.query(sql1+sql2+sql3+sql4+sql5, (err, rows) => {
+        if(err) throw err;
+        //queryResult.push(rows[0].map(v => Object.assign({}, v)));
+        //queryResult.push(rows[1].map(v => Object.assign({}, v)));
+        //queryResult.push(rows[2].map(v => Object.assign({}, v)));
+        //queryResult.push(rows[3].map(v => Object.assign({}, v)));
+        //queryResult.push(rows[4].map(v => Object.assign({}, v)));
+        queryResult.push(rows[0][0]);
+        queryResult.push(rows[1][0]);
+        queryResult.push(rows[2][0]);
+        queryResult.push(rows[3][0]);
+        queryResult.push(rows[4][0]);
+        console.log(queryResult);
+        //console.log(queryResult[1].title);
+        res.send(queryResult);
+      })
+      console.timeEnd('node runtime');
+      });
+    });
+    
+})
 
 
 
