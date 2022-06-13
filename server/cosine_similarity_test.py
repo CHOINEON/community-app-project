@@ -3,6 +3,7 @@ import os
 import time
 start = time.time()  # start time
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from konlpy.tag import Okt
 from konlpy.tag import Mecab
@@ -55,6 +56,14 @@ with tf.device('/cpu:0'):
     #print(data)
 
     tfidf_gen = TfidfVectorizer() #일반적인 방식
+    #count_vec = CountVectorizer()
+    
+    # 코퍼스로부터 각 단어의 빈도수를 기록
+    #data['title'] = avoid_null(data, 'title')
+    #print('bag of words vector :', count_vec.fit_transform(data['title']).toarray()) 
+
+    # 각 단어의 인덱스가 어떻게 부여되었는지를 출력
+    #print('vocabulary :',count_vec.vocabulary_)
 
     #ti-idf를 계산하여 title 값을 받아옴
     data_tit = tfidf(data, tfidf_gen)
