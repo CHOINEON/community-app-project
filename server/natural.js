@@ -1,7 +1,6 @@
 function tokenizer(document){
     let mecab = require('mecab-ya');
     let tokenized_document = mecab.nounsSync(document);
-    
     return tokenized_document;
 }
 
@@ -17,7 +16,7 @@ function build_bag_of_words(tokenized_document){
             total_document.push(tokenized_document[index][j]);
         }
     }
-    console.log('total document : ', total_document);
+    //console.log('total document : ', total_document);
     
     // 단어에 index 맵핑
     for(let word in total_document){
@@ -68,7 +67,7 @@ function get_idf(bow){
             }
         }
     }
-    console.log('document frequency : ', df);
+    //console.log('document frequency : ', df);
 
     let idf = [];
     let N = bow.length; // 전체 문서의 수
@@ -79,7 +78,7 @@ function get_idf(bow){
     for(let i in idf){
         idf[i] = 1 + Math.log(N / (1 + df[i])); // 자연로그
     }
-    console.log('inverse document frequency : ',idf);
+    //console.log('inverse document frequency : ',idf);
     
     return idf;
 }
@@ -99,7 +98,7 @@ function get_tfidf(bow, idf){
         
         tfidf.push(tfidf_temp);
     }
-    console.log('TF-IDF : ', tfidf);
+    //console.log('TF-IDF : ', tfidf);
     
     return tfidf;
 }
@@ -115,8 +114,15 @@ function cosine_similarity(tfidf){
             // 0번 벡터와 i번 벡터의 스칼라곱
             scalar_product += tfidf[0][j] * tfidf[i][j];
         }
-        let cos_sim_temp = scalar_product / (normalized_zero * normalize(tfidf[i]));
-        cos_sim_temp = Number(cos_sim_temp.toFixed(5));
+        
+        let cos_sim_temp = 0;
+        if(scalar_product === 0){
+            cos_sim_temp = 0;
+        }
+        else{
+            cos_sim_temp = scalar_product / (normalized_zero * normalize(tfidf[i]));
+            cos_sim_temp = Number(cos_sim_temp.toFixed(5));
+        }
         
         let cos_sim_obj = {
             index: i,
@@ -124,7 +130,7 @@ function cosine_similarity(tfidf){
         };
         cos_sim.push(cos_sim_obj);
     }
-    console.log('cosine_similarity : ', cos_sim);
+    //console.log('cosine_similarity : ', cos_sim);
     
     return cos_sim;
 }
