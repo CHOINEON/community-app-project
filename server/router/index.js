@@ -2,7 +2,57 @@ const { query } = require('express');
 const express = require('express');
 const router = express.Router();
 const db = require('../dbconnection');
+const db2 = require('../dbconnectionSync.js');
 const util = require('util');
+
+
+router.get('/api/mecab', async (req, res) => {
+    console.time('node runtime');
+    let natural = require('../natural.js');
+    let document = [];
+    document.push('정부가 발표하는 물가상승률과 소비자가 느끼는 물가상승률은 다르다.');
+    document.push('소비자는 주로 소비하는 상품을 기준으로 물가상승률을 느낀다.');
+    
+    let DBdata = [];
+    let sql = 'select bid, title from board';
+    
+    //db.query('select bid, title from board', (err, rows) =>{
+    //  DBdata = rows.map(v => Object.assign({}, v));
+      //console.log(DBdata);
+    //  console.log(DBdata[0].title);
+    //  for(let i in DBdata){
+    //      document.push(DBdata[i].title);
+    //  }
+    //});
+    
+    // 문서 토큰화
+    let tokenized_document = [];
+    for(i in document){
+        tokenized_document.push(natural.tokenizer(document[i]));
+    }
+    console.log('tokenized_document : ', tokenized_document);
+    
+    // 모든 단어에 index 맵핑
+    let result = natural.build_bag_of_words(tokenized_document);
+    let vocab = result[0];
+    let bow = result[1];
+    console.log('vocabulary : ', vocab);
+    console.log('bag of words vectors(term frequency) : ', bow);
+    console.log(bow.length);
+    
+    // 모든 단어의 idf 구하기
+    let idf = natural.get_idf(bow);
+    
+    // 모든 문서의 tfidf 구하기
+    let tfidf = natural.get_tfidf(bow, idf);
+    
+    // 0번 문서와 나머지 문서의 유사도 검사
+    let cos_sim = natural.cosine_similarity(tfidf);
+    
+    res.send('done');
+    console.timeEnd('node runtime');
+});
+
 
 router.get('/', (req, res) => {
     res.send({data : 'hello world'});
