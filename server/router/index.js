@@ -77,7 +77,44 @@ router.get('/api/NLPwithFile', async (req, res) => {
     // 유저의 질문과 토큰화된 문서 합치기
     let tokenized_UserQ = natural.tokenizer_DB(UserQ);
     tokenized_document.unshift(tokenized_UserQ);
-      
+
+    // 모든 단어에 index 매핑
+    let result = natural.build_bag_of_words_DB(tokenized_document);
+    let vocab = result[0];
+    let bow = result[1];
+    
+    // 모든 단어의 idf 구하기
+    let idf = natural.get_idf_DB(bow);
+     
+    // 모든 문서의 tfidf 구하기
+    let tfidf = natural.get_tfidf_DB(bow, idf);
+     
+    // 0번 문서와 나머지 문서의 유사도 검사
+    let cos_sim = natural.cosine_similarity_DB(tfidf);
+    console.log(cos_sim);
+    
+    res.send('done');
+});
+
+router.get('/api/NLPwithFileTest', async (req, res) => {
+    let natural = require('../natural.js');
+    let document = [];
+    
+    // 미리 토큰화된 문서들 가져오기
+    console.time('read file time');
+    let path = '/home/ksh/node-project/server/tokenized_DBdata';
+    let tokenized_document = natural.load_tokenized_document_file(path);
+    //console.log(tokenized_document);
+    console.timeEnd('read file time');
+    
+    let UserQ = {
+        bid: 0,
+        title: '코딩',
+    };
+    
+    // 유저의 질문과 토큰화된 문서 합치기
+    let tokenized_UserQ = natural.tokenizer_DB(UserQ);
+    tokenized_document.unshift(tokenized_UserQ);
 
     let time = [];
     let sum = 0;
@@ -108,27 +145,6 @@ router.get('/api/NLPwithFile', async (req, res) => {
       console.log(time);
       console.log('average time : ', sum/10);
     }
-    
-    /*
-    // 유저의 질문과 토큰화된 문서 합치기
-    let tokenized_UserQ = natural.tokenizer_DB(UserQ);
-    tokenized_document.unshift(tokenized_UserQ);
-    
-    // 모든 단어에 index 매핑
-    let result = natural.build_bag_of_words_DB(tokenized_document);
-    let vocab = result[0];
-    let bow = result[1];
-    
-    // 모든 단어의 idf 구하기
-    let idf = natural.get_idf_DB(bow);
-     
-    // 모든 문서의 tfidf 구하기
-    let tfidf = natural.get_tfidf_DB(bow, idf);
-     
-    // 0번 문서와 나머지 문서의 유사도 검사
-    let cos_sim = natural.cosine_similarity_DB(tfidf);
-    console.log(cos_sim);
-    */
     
     res.send('done');
 });
@@ -309,13 +325,14 @@ router.get('/api/CSVToDB', (req, res) => {
     const csv = require('csv-parser');
     const dataArray = [];
     
-    fs.createReadStream('/home/ksh/node-project/server/OKKY C++ utf8.csv')
+    fs.createReadStream('/home/ksh/node-project/server/OKKY Q&A 20k utf8.csv')
           .pipe(csv({delimiter: ','}))
           .on("data", (row) => {
             dataArray.push(row);
           })
           .on("end", () => {
           
+            /*
             // 중복 제거
             for(var i in dataArray){
               const iTitle = dataArray[i]["title"];
@@ -326,13 +343,16 @@ router.get('/api/CSVToDB', (req, res) => {
                 }
               }
             }
+            */
+            
             
             // db로 옮기기
-            var contentMax = 0;
-            var titleMax = 0;
+            let contentMax = 0;
+            let titleMax = 0;
             for(var i in dataArray){
               const title = dataArray[i]["title"];
               const content = dataArray[i]["content"];
+              const reply = dataArray[i]["reply"];
               // max size 체크
               if(contentMax<content.length){
                 contentMax = content.length;
@@ -341,6 +361,7 @@ router.get('/api/CSVToDB', (req, res) => {
                 titleMax = title.length;
               }
               
+              /*
               db.query('insert into board (title, content)values (?,?)', [title, content], (err, rows)=>{
                 if(!err){
                 }
@@ -348,10 +369,11 @@ router.get('/api/CSVToDB', (req, res) => {
                   console.log(err);
                 }
               });
+              */
             }
             
             console.log(dataArray);
-            res.send(dataArray);
+            res.send('done');
             
             console.log(titleMax);
             console.log(contentMax);

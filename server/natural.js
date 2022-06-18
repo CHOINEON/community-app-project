@@ -51,6 +51,9 @@ function build_bag_of_words(tokenized_document){
         bow.push(bow_temp);
     }
     
+    console.log('vocabulary : ', word_to_index);
+    console.log('bag of words vectors(term frequency) : ', bow);
+    
     return [word_to_index, bow];
 }
 
