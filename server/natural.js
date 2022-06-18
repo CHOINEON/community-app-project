@@ -16,7 +16,7 @@ function build_bag_of_words(tokenized_document){
             total_document.push(tokenized_document[index][j]);
         }
     }
-    //console.log('total document : ', total_document);
+    console.log('total document : ', total_document);
     
     // 단어에 index 맵핑
     for(let word in total_document){
@@ -67,7 +67,7 @@ function get_idf(bow){
             }
         }
     }
-    //console.log('document frequency : ', df);
+    console.log('document frequency : ', df);
 
     let idf = [];
     let N = bow.length; // 전체 문서의 수
@@ -78,15 +78,15 @@ function get_idf(bow){
     for(let i in idf){
         idf[i] = 1 + Math.log(N / (1 + df[i])); // 자연로그
     }
-    //console.log('inverse document frequency : ',idf);
+    console.log('inverse document frequency : ',idf);
     
     return idf;
 }
 
 function get_tfidf(bow, idf){
+    // tfidf 구하기
     let tfidf = [];
     
-    // tfidf 구하기
     for(let i in bow){
         let tfidf_temp = [];
         tfidf_temp.length = bow[0].length;
@@ -98,13 +98,13 @@ function get_tfidf(bow, idf){
         
         tfidf.push(tfidf_temp);
     }
-    //console.log('TF-IDF : ', tfidf);
+    console.log('TF-IDF : ', tfidf);
     
     return tfidf;
 }
 
 function cosine_similarity(tfidf){
-    //0번 문서와 다른 모든 문서를 비교함
+    //0번 문서와 다른 모든 문서를 비교해서 코사인 유사도를 구함
     let cos_sim = [];
     let normalized_zero = normalize(tfidf[0]);
     
@@ -117,9 +117,11 @@ function cosine_similarity(tfidf){
         
         let cos_sim_temp = 0;
         if(scalar_product === 0){
+            // 분자가 0이면 코사인 유사도 = 0
             cos_sim_temp = 0;
         }
         else{
+            // 분자가 0이 아니면 코사인 유사도 공식 사용
             cos_sim_temp = scalar_product / (normalized_zero * normalize(tfidf[i]));
             cos_sim_temp = Number(cos_sim_temp.toFixed(5));
         }
@@ -130,12 +132,208 @@ function cosine_similarity(tfidf){
         };
         cos_sim.push(cos_sim_obj);
     }
-    //console.log('cosine_similarity : ', cos_sim);
+
+    // 유사도 오름차순 정렬    
+    cos_sim.sort(function(a, b) {
+        return b.similarity - a.similarity;
+    });
+    
+    console.log('cosine_similarity : ', cos_sim);
     
     return cos_sim;
 }
 
+// DB데이터 사용할 때
+function tokenizer_DB(document){
+    let mecab = require('mecab-ya');
+    document.title = mecab.nounsSync(document.title);
+    return document;
+}
+
+function build_bag_of_words_DB(tokenized_document){
+    let word_to_index = new Map();
+    let total_bow = [];
+    let total_document = [];
+    let bow = [];
+    
+    // 하나의 문서로 통합
+    for(let index in tokenized_document){
+        for(let j in tokenized_document[index].title){
+            total_document.push(tokenized_document[index].title[j]);
+        }
+    }
+    //console.log('total document : ', total_document);
+    
+    // 단어에 index 맵핑
+    for(let word in total_document){
+        if(word_to_index.get(total_document[word]) == null){
+            // 처음 등장하는 단어 처리
+            word_to_index.set(total_document[word], word_to_index.size);
+            total_bow.splice(word_to_index.size - 1, 0, 1);
+        }
+        else{
+            // 재등장하는 단어 처리
+            let index = word_to_index.get(total_document[word]);
+            total_bow[index] = total_bow[index] + 1;
+        }
+    }
+    
+    for(let index in tokenized_document){
+        let bow_obj = {};
+        let bow_temp = [];
+        bow_temp.length = word_to_index.size;
+        bow_temp.fill(0);
+        
+        // 개별 문서의 BOW 구하기(tf 구하기)
+        for(let word in bow_temp){
+            let i = word_to_index.get(tokenized_document[index].title[word]);
+            bow_temp[i] = bow_temp[i] + 1;
+        }
+        
+        // NaN 제거
+        bow_temp = bow_temp.filter(function(item){
+          return item !== null && item !== undefined && item !== '';
+        });
+        
+        bow_obj = {
+            bid: tokenized_document[index].bid,
+            bow: bow_temp
+        };
+        
+        bow.push(bow_obj);
+    }
+    
+    //console.log('vocabulary : ', word_to_index);
+    //console.log('bag of words vectors(term frequency) : ', bow);
+    
+    return [word_to_index, bow];
+}
+
+
+function get_idf_DB(bow){
+    let df = [];
+    df.length = bow[0].bow.length;
+    df.fill(0);
+    
+    // df 구하기
+    for(let i in df){
+        for(let index in bow){
+            if(bow[index].bow[i] !== 0){
+                df[i] += 1;
+            }
+        }
+    }
+    //console.log('document frequency : ', df);
+
+    let idf = [];
+    let N = bow.length; // 전체 문서의 수
+    idf.length = bow[0].bow.length;
+    idf.fill(0);
+    
+    // idf 구하기
+    for(let i in idf){
+        idf[i] = 1 + Math.log(N / (1 + df[i])); // 자연로그
+    }
+    //console.log('inverse document frequency : ',idf);
+    
+    return idf;
+}
+
+function get_tfidf_DB(bow, idf){
+    // tfidf 구하기
+    let tfidf = [];
+    let tfidf_obj = {};
+    
+    for(let i in bow){
+        let tfidf_temp = [];
+        tfidf_temp.length = bow[0].bow.length;
+        tfidf_temp.fill(0);
+        
+        for(let j in bow[0].bow){
+            tfidf_temp[j] = bow[i].bow[j] * idf[j];
+        }
+        
+        tfidf_obj = {
+            bid: bow[i].bid,
+            tfidf: tfidf_temp
+        };
+        
+        tfidf.push(tfidf_obj);
+    }
+    //console.log('TF-IDF : ', tfidf);
+    
+    return tfidf;
+}
+
+function cosine_similarity_DB(tfidf){
+    //0번 문서와 다른 모든 문서를 비교해서 코사인 유사도를 구함
+    let cos_sim = [];
+    let normalized_zero = normalize(tfidf[0].tfidf);
+    
+    for(let i in tfidf){
+        let scalar_product = 0;
+        for(let j in tfidf[i].tfidf){
+            // 0번 벡터와 i번 벡터의 스칼라곱
+            scalar_product += tfidf[0].tfidf[j] * tfidf[i].tfidf[j];
+        }
+        
+        let cos_sim_temp = 0;
+        if(scalar_product === 0){
+            // 분자가 0이면 코사인 유사도 = 0
+            cos_sim_temp = 0;
+        }
+        else{
+            // 분자가 0이 아니면 코사인 유사도 공식 사용
+            cos_sim_temp = scalar_product / (normalized_zero * normalize(tfidf[i].tfidf));
+            cos_sim_temp = Number(cos_sim_temp.toFixed(5));
+        }
+        
+        let cos_sim_obj = {
+            bid: tfidf[i].bid,
+            similarity: cos_sim_temp
+        };
+        cos_sim.push(cos_sim_obj);
+    }
+
+    // 유사도 오름차순 정렬    
+    cos_sim.sort(function(a, b) {
+        return b.similarity - a.similarity;
+    });
+    
+    // 상위 5개의 bid만 추출
+    let top5_cos_sim_bid = [];
+    //console.log('cosine_similarity : ', cos_sim[0]);
+    for(let i=1; i<6; i++){
+        console.log(cos_sim[i]);
+        top5_cos_sim_bid.push(cos_sim[i].bid);
+    }
+    //console.log('cosine_similarity : ', cos_sim);
+    
+    return top5_cos_sim_bid;
+}
+
+function save_tokenized_document_file(path, tokenized_document){
+    const fs = require('fs');
+    fs.writeFile(path, JSON.stringify(tokenized_document), err => {
+        if(err){
+            console.error(err);
+            return;
+        }
+        else{
+            console.log('tokenized_document saved in : ', path);
+        }
+    });
+}
+
+function load_tokenized_document_file(path){
+    const fs = require('fs');
+    let readData = fs.readFileSync(path);
+    return JSON.parse(readData.toString());
+}
+
+
 function normalize(vector){
+    // 벡터 정규화 공식
     let sum_square = 0;
     for(let i in vector){
         sum_square += vector[i] * vector[i];
@@ -147,8 +345,15 @@ function normalize(vector){
 
 module.exports = {
     tokenizer,
+    tokenizer_DB,
     build_bag_of_words,
+    build_bag_of_words_DB,
     get_idf,
+    get_idf_DB,
     get_tfidf,
+    get_tfidf_DB,
     cosine_similarity,
+    cosine_similarity_DB,
+    save_tokenized_document_file,
+    load_tokenized_document_file,
 };
