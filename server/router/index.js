@@ -5,14 +5,14 @@ const db = require('../dbconnection');
 const util = require('util');
 
 
-router.get('/api/saveDBdata', (req, res) => {
+router.get('/api/saveTokenizedDBdata', (req, res) => {
     let DBdata = [];
-    db.query('select bid, title from board', (err, rows) =>{
+    db.query('select bid, title from board2', (err, rows) =>{
         DBdata = rows.map(v => Object.assign({}, v));
     
         let natural = require('../natural.js');
         let document = [];
-        for(let i=0;i<799;i++){
+        for(let i=0;i<10000;i++){
             document.push(DBdata[i]);
         }
         
@@ -85,7 +85,8 @@ router.get('/api/NLPwithFile', async (req, res) => {
     
     // 모든 단어의 idf 구하기
     let idf = natural.get_idf_DB(bow);
-     
+    
+    
     // 모든 문서의 tfidf 구하기
     let tfidf = natural.get_tfidf_DB(bow, idf);
      
@@ -352,7 +353,6 @@ router.get('/api/CSVToDB', (req, res) => {
             for(var i in dataArray){
               const title = dataArray[i]["title"];
               const content = dataArray[i]["content"];
-              const reply = dataArray[i]["reply"];
               // max size 체크
               if(contentMax<content.length){
                 contentMax = content.length;
@@ -361,15 +361,15 @@ router.get('/api/CSVToDB', (req, res) => {
                 titleMax = title.length;
               }
               
-              /*
-              db.query('insert into board (title, content)values (?,?)', [title, content], (err, rows)=>{
+              
+              db.query('insert into board2 (title, content)values (?,?)', [title, content], (err, rows)=>{
                 if(!err){
                 }
                 else{
                   console.log(err);
                 }
               });
-              */
+              
             }
             
             console.log(dataArray);

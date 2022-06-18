@@ -160,14 +160,17 @@ function build_bag_of_words_DB(tokenized_document){
     let bow = [];
     
     // 하나의 문서로 통합
+    console.time('make total document');
     for(let index in tokenized_document){
         for(let j in tokenized_document[index].title){
             total_document.push(tokenized_document[index].title[j]);
         }
     }
-    //console.log('total document : ', total_document);
+    console.log('total document : ', total_document);
+    console.timeEnd('make total document');
     
     // 단어에 index 맵핑
+    console.time('make vocabulary dictionary');
     for(let word in total_document){
         if(word_to_index.get(total_document[word]) == null){
             // 처음 등장하는 단어 처리
@@ -180,14 +183,17 @@ function build_bag_of_words_DB(tokenized_document){
             total_bow[index] = total_bow[index] + 1;
         }
     }
+    console.log('vocabulary : ', word_to_index);
+    console.timeEnd('make vocabulary dictionary');
     
+    // 개별 문서의 BOW 구하기(tf 구하기)
+    console.time('make bow');
     for(let index in tokenized_document){
         let bow_obj = {};
         let bow_temp = [];
         bow_temp.length = word_to_index.size;
         bow_temp.fill(0);
         
-        // 개별 문서의 BOW 구하기(tf 구하기)
         for(let word in bow_temp){
             let i = word_to_index.get(tokenized_document[index].title[word]);
             bow_temp[i] = bow_temp[i] + 1;
@@ -205,9 +211,8 @@ function build_bag_of_words_DB(tokenized_document){
         
         bow.push(bow_obj);
     }
-    
-    //console.log('vocabulary : ', word_to_index);
-    //console.log('bag of words vectors(term frequency) : ', bow);
+    console.log('bag of words vectors(term frequency) : ', bow);
+    console.timeEnd('make bow');
     
     return [word_to_index, bow];
 }
@@ -219,6 +224,7 @@ function get_idf_DB(bow){
     df.fill(0);
     
     // df 구하기
+    console.time('make df');
     for(let i in df){
         for(let index in bow){
             if(bow[index].bow[i] !== 0){
@@ -226,7 +232,8 @@ function get_idf_DB(bow){
             }
         }
     }
-    //console.log('document frequency : ', df);
+    console.log('document frequency : ', df);
+    console.timeEnd('make df');
 
     let idf = [];
     let N = bow.length; // 전체 문서의 수
@@ -234,16 +241,19 @@ function get_idf_DB(bow){
     idf.fill(0);
     
     // idf 구하기
+    console.time('make idf');
     for(let i in idf){
         idf[i] = 1 + Math.log(N / (1 + df[i])); // 자연로그
     }
-    //console.log('inverse document frequency : ',idf);
+    console.log('inverse document frequency : ',idf);
+    console.timeEnd('make idf');
     
     return idf;
 }
 
 function get_tfidf_DB(bow, idf){
     // tfidf 구하기
+    console.time('make tfidf');
     let tfidf = [];
     let tfidf_obj = {};
     
@@ -263,7 +273,8 @@ function get_tfidf_DB(bow, idf){
         
         tfidf.push(tfidf_obj);
     }
-    //console.log('TF-IDF : ', tfidf);
+    console.log('TF-IDF : ', tfidf);
+    console.timeEnd('make tfidf');
     
     return tfidf;
 }
