@@ -84,14 +84,14 @@ router.get('/api/NLPwithFile', async (req, res) => {
     let bow = result[1];
     
     // 모든 단어의 idf 구하기
-    let idf = natural.get_idf_DB(bow);
+    let idf = natural.get_idf_DB(bow, vocab);
     
     
     // 모든 문서의 tfidf 구하기
     let tfidf = natural.get_tfidf_DB(bow, idf);
      
     // 0번 문서와 나머지 문서의 유사도 검사
-    let cos_sim = natural.cosine_similarity_DB(tfidf);
+    let cos_sim = natural.cosine_similarity_DB(tfidf, vocab);
     console.log(cos_sim);
     
     res.send('done');
@@ -128,13 +128,13 @@ router.get('/api/NLPwithFileTest', async (req, res) => {
       let bow = result[1];
       
       // 모든 단어의 idf 구하기
-      let idf = natural.get_idf_DB(bow);
+      let idf = natural.get_idf_DB(bow, vocab);
        
       // 모든 문서의 tfidf 구하기
       let tfidf = natural.get_tfidf_DB(bow, idf);
        
       // 0번 문서와 나머지 문서의 유사도 검사
-      let cos_sim = natural.cosine_similarity_DB(tfidf);
+      let cos_sim = natural.cosine_similarity_DB(tfidf, vocab);
       console.log(cos_sim);
       
       let end = new Date();
