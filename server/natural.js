@@ -149,7 +149,10 @@ function cosine_similarity(tfidf){
 // DB데이터 사용할 때
 function tokenizer_DB(document){
     let mecab = require('mecab-ya');
-    document.title = mecab.nounsSync(document.title);
+    if(document.title){
+        //document.title = mecab.posSync(document.title);
+        document.title = mecab.nounsSync(document.title);
+    }
     return document;
 }
 
@@ -238,7 +241,7 @@ function build_bag_of_words_DB(tokenized_document){
             bid: tokenized_document[index].bid,
             bow: bow_temp
         };
-        
+        //if(index%10000 === 0) console.log(index);
         bow.push(bow_obj);
     }
     //console.log('bag of words vectors(term frequency) : ', bow);
@@ -314,7 +317,7 @@ function get_tfidf_DB(bow, idf){
     return tfidf;
 }
 
-function cosine_similarity_DB(tfidf, vocab){
+function cosine_similarity_DB(tfidf){
     //0번 문서와 다른 모든 문서를 비교해서 코사인 유사도를 구함
     console.time('cosine similarity test');
     let cos_sim = [];
@@ -342,6 +345,8 @@ function cosine_similarity_DB(tfidf, vocab){
             cos_sim_temp = Number(cos_sim_temp.toFixed(5));
         }
         
+        
+        
         let cos_sim_obj = {
             bid: tfidf[i].bid,
             similarity: cos_sim_temp
@@ -358,7 +363,7 @@ function cosine_similarity_DB(tfidf, vocab){
     let top5_cos_sim_bid = [];
     //console.log('cosine_similarity : ', cos_sim[0]);
     for(let i=1; i<6; i++){
-        //console.log(cos_sim[i]);
+        console.log(cos_sim[i]);
         top5_cos_sim_bid.push(cos_sim[i].bid);
     }
     //console.log('cosine_similarity : ', cos_sim);
@@ -367,20 +372,20 @@ function cosine_similarity_DB(tfidf, vocab){
     return top5_cos_sim_bid;
 }
 
-function save_tokenized_document_file(path, tokenized_document){
+function save_document_file(path, document){
     const fs = require('fs');
-    fs.writeFile(path, JSON.stringify(tokenized_document), err => {
+    fs.writeFile(path, JSON.stringify(document), err => {
         if(err){
             console.error(err);
             return;
         }
         else{
-            console.log('tokenized_document saved in : ', path);
+            console.log('document saved in : ', path);
         }
     });
 }
 
-function load_tokenized_document_file(path){
+function load_document_file(path){
     const fs = require('fs');
     let readData = fs.readFileSync(path);
     return JSON.parse(readData.toString());
@@ -419,6 +424,6 @@ module.exports = {
     get_tfidf_DB,
     cosine_similarity,
     cosine_similarity_DB,
-    save_tokenized_document_file,
-    load_tokenized_document_file,
+    save_document_file,
+    load_document_file,
 };
