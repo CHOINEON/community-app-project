@@ -213,22 +213,23 @@ function build_bag_of_words_DB(tokenized_document){
                 };
                 bow_temp.push(pair);
             }
-            
-            let flag = 0;
-            for(let k in bow_temp){
-                if(bow_temp[k].index === i){
-                    bow_temp[k].value += 1;
-                    flag = 1;
-                    break;
+            else{
+                let flag = 0;
+                for(let k in bow_temp){
+                    if(bow_temp[k].index === i){
+                        bow_temp[k].value += 1;
+                        flag = 1;
+                        break;
+                    }
                 }
-            }
-            
-            if(flag === 0){
-                let pair = {
-                    index: i,
-                    value: 1
-                };
-                bow_temp.push(pair);
+                
+                if(flag === 0){
+                    let pair = {
+                        index: i,
+                        value: 1
+                    };
+                    bow_temp.push(pair);
+                }
             }
         }
         
@@ -236,7 +237,6 @@ function build_bag_of_words_DB(tokenized_document){
         //bow_temp = bow_temp.filter(function(item){
         //  return item !== null && item !== undefined && item !== '';
         //});
-        
         bow_obj = {
             bid: tokenized_document[index].bid,
             bow: bow_temp
@@ -245,7 +245,9 @@ function build_bag_of_words_DB(tokenized_document){
         bow.push(bow_obj);
     }
     //console.log('bag of words vectors(term frequency) : ', bow);
-    //console.log('0 vector vow : ', bow[0].bow);
+    //for(let i=0;i<10;i++){
+    //    console.log(i, ' vector vow : ', bow[i].bow);
+    //}
     //console.log(bow[0].bow[0]);
     //console.log(bow[0].bow[0].index);
     //console.log(bow[0].bow[0].value);
@@ -291,6 +293,7 @@ function get_tfidf_DB(bow, idf){
     console.time('make tfidf');
     let tfidf = [];
     let tfidf_obj = {};
+    let sum = 0;
     
     for(let i in bow){// 문서 개수만큼
         let tfidf_temp = [];
@@ -304,14 +307,23 @@ function get_tfidf_DB(bow, idf){
             tfidf_temp.push(pair);
         }
         
+        // tfidf index 내림차순 정렬    
+        tfidf_temp.sort(function(a, b) {
+            return a.index - b.index;
+        });
+        
         tfidf_obj = {
             bid: bow[i].bid,
             tfidf: tfidf_temp
         };
-        
+        sum += tfidf_temp.length;
         tfidf.push(tfidf_obj);
     }
     //console.log('TF-IDF : ', tfidf);
+    //for(let i=0;i<10;i++){
+    //    console.log(i,' tfidf vector : ', tfidf[i]);
+    //}
+    //console.log('tfidf number : ',sum);
     console.timeEnd('make tfidf');
     
     return tfidf;
@@ -327,9 +339,11 @@ function cosine_similarity_DB(tfidf){
         let scalar_product = 0;
         for(let j in tfidf[0].tfidf){// 0번 문서의 tfidf 개수만큼
             for(let k in tfidf[i].tfidf){// i번 문서의 tfidf 개수만큼
+
                 // 0번 벡터와 i번 벡터의 스칼라곱
                 if(tfidf[0].tfidf[j].index === tfidf[i].tfidf[k].index){
                     scalar_product += tfidf[0].tfidf[j].value * tfidf[i].tfidf[k].value;
+                    break;
                 }
             }
         }
@@ -344,8 +358,6 @@ function cosine_similarity_DB(tfidf){
             cos_sim_temp = scalar_product / (normalized_zero * normalize_DB(tfidf[i].tfidf));
             cos_sim_temp = Number(cos_sim_temp.toFixed(5));
         }
-        
-        
         
         let cos_sim_obj = {
             bid: tfidf[i].bid,

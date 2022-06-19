@@ -88,6 +88,7 @@ router.get('/api/saveTfidfDBdata', (req, res) => {
     natural.save_document_file(path, tfidf);
     console.log('document number: ', tfidf.length);
     console.timeEnd('runtime');
+    res.send('done');
 });
 
 router.get('/api/NLPwithTfidfFile', async (req, res) => {
@@ -192,6 +193,9 @@ router.get('/api/NLPwithTfidfFile', async (req, res) => {
         };
         tfidf_temp.push(pair);
     }
+    tfidf_temp.sort(function(a, b) {
+        return a.index - b.index;
+    });
     tfidf_obj_UserQ = {
         bid: bow_obj_UserQ.bid,
         tfidf: tfidf_temp
@@ -323,6 +327,9 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
         };
         tfidf_temp.push(pair);
     }
+    tfidf_temp.sort(function(a, b) {
+        return a.index - b.index;
+    });
     tfidf_obj_UserQ = {
         bid: bow_obj_UserQ.bid,
         tfidf: tfidf_temp
@@ -409,7 +416,7 @@ router.get('/api/NLPwithFile', async (req, res) => {
     // 유저의 질문과 토큰화된 문서 합치기
     let tokenized_UserQ = natural.tokenizer_DB(UserQ);
     tokenized_document.unshift(tokenized_UserQ);
-    //console.log(tokenized_UserQ);
+    //console.log(tokenized_document);
 
     // 모든 단어에 index 매핑
     let result = natural.build_bag_of_words_DB(tokenized_document);
@@ -748,12 +755,10 @@ router.post('/api/expectedAnswer',(req, res) => {
     //console.log(idf);
     
     // 미리 저장된 tfidf 불러오기
-    console.time('read tfidf time');
     //path = '/home/ksh/node-project/server/tfidf_DBdata_' + num;
     //let tfidf = natural.load_document_file(path);
     let tfidf = server_tfidf;
     //console.log(tfidf);
-    console.timeEnd('read tfidf time');
     console.timeEnd('read file time');
     
     // 유저 질문 토큰이 단어 사전에 존재하는지 확인
@@ -818,6 +823,9 @@ router.post('/api/expectedAnswer',(req, res) => {
         };
         tfidf_temp.push(pair);
     }
+    tfidf_temp.sort(function(a, b) {
+        return a.index - b.index;
+    });
     tfidf_obj_UserQ = {
         bid: bow_obj_UserQ.bid,
         tfidf: tfidf_temp
