@@ -4,6 +4,8 @@ const router = express.Router();
 const db = require('../dbconnection');
 const util = require('util');
 const nat = require('../natural');
+const simpleTfidfTest = require('../simple-tf-idf-test');
+const simpleTfidf = require('../simple-tf-idf');
 
 let NUM = '10k';
 let server_tfidf = nat.load_document_file('/home/ksh/node-project/server/tfidf_DBdata_' + NUM);
@@ -17,28 +19,27 @@ router.get('/api/saveTokenizedDBdata', (req, res) => {
         let natural = require('../natural.js');
         let document = [];
         for(let i=0;i<10000;i++){
-            document.push(DBdata[i]);
+            document.push(DBdata[i].title);
         }
         console.log(document);
         
         console.time('tokenize time');
-        let tokenized_document = [];
-        for(i in document){
-            tokenized_document.push(natural.tokenizer_DB(document[i]));
-        }
+        let tokenized_document = natural.tokenizer(document);
         console.log(tokenized_document);
+        console.timeEnd('tokenize time');
         
+        /*
         for(let i=0;i<49;i++){
             for(let j=0;j<10000;j++){
                 tokenized_document.push(tokenized_document[j]);
             }
         }
         console.log(tokenized_document);
+        */
         
         let path = '/home/ksh/node-project/server/tokenized_DBdata';
         natural.save_document_file(path, tokenized_document);
         console.log('document number: ', document.length);
-        console.timeEnd('tokenize time');
         res.send('done');
     });
 })
@@ -350,7 +351,7 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     let t = (end_run-start_run)/1000;
     sum+=t;
     time.push(t);
-    console.log('documnet number : ', tfidf.length);
+    console.log('document number : ', tfidf.length);
     console.log('file read time : ', temp, ' s');
     console.log('function runtime : ', t, ' s');
     console.log(time_file);
@@ -364,36 +365,65 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     res.send('done');
 });
 
-router.get('/api/NLPtest', async (req, res) => {
-    let natural = require('../natural.js');
+router.get('/api/NLPtest', (req, res) => {
     let document = [];
     document.push('정부가 발표하는 물가상승률과 소비자가 느끼는 물가상승률은 다르다.');
     document.push('소비자는 주로 소비하는 상품을 기준으로 물가상승률을 느낀다.');
+    console.log(document);
 
-     // 문서 토큰화
-     let tokenized_document = [];
-     for(i in document){
-         tokenized_document.push(natural.tokenizer(document[i]));
-     }
-     console.log('tokenized_document : ', tokenized_document);
-     
-     // 모든 단어에 index 맵핑
-     let result = natural.build_bag_of_words(tokenized_document);
-     let vocab = result[0];
-     let bow = result[1];
-     console.log(bow.length);
-     
-     // 모든 단어의 idf 구하기
-     let idf = natural.get_idf(bow);
-     
-     // 모든 문서의 tfidf 구하기
-     let tfidf = natural.get_tfidf(bow, idf);
-     
-     // 0번 문서와 나머지 문서의 유사도 검사
-     let cos_sim = natural.cosine_similarity(tfidf);
+    simpleTfidfTest.similarity_test(document);
     
     res.send('done');
 });
+
+router.get('/api/NLPtest2', (req, res) => {
+    let DBdata = [];
+    db.query('select bid, title from board2', (err, rows) =>{
+        DBdata = rows.map(v => Object.assign({}, v));
+    
+        let document = [];
+        for(let i=0;i<1000;i++){
+            document.push(DBdata[i].title);
+        }
+        console.log(document);
+        
+        simpleTfidf.similarity_test(document);
+        
+        res.send('done');
+    });
+});
+
+router.get('/api/NLPtest3', (req, res) => {
+
+    let document = simpleTfidf.load_document_file('/home/ksh/node-project/server/tokenized_data_10k');
+    
+    //console.log(document);
+    let sum = 0;
+    let time = [];
+    for(let i=0;i<10;i++){
+      let start = new Date();
+      simpleTfidf.similarity_test_token(document);
+      let end = new Date();
+      let t = (end-start)/1000;
+      sum+=t;
+      time.push(t);
+      console.log('function runtime : ', t, ' s');
+      console.log(time);
+      console.log('average time : ', sum/10);
+    }
+    
+    res.send('done');
+});
+
+router.get('/api/NLPtest4', (req, res) => {
+
+    let document = simpleTfidf.load_document_file('/home/ksh/node-project/server/tokenized_data_10k');
+    
+    simpleTfidf.similarity_test_token(document);
+    
+    res.send('done');
+});
+
 
 router.get('/api/NLPwithFile', async (req, res) => {
     console.time('runtime');

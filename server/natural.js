@@ -1,6 +1,9 @@
 function tokenizer(document){
     let mecab = require('mecab-ya');
-    let tokenized_document = mecab.nounsSync(document);
+    let tokenized_document = [];
+    for(let i in document){
+        tokenized_document.push(mecab.nounsSync(document[i]));
+    }
     return tokenized_document;
 }
 
