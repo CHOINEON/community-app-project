@@ -6,91 +6,77 @@ const util = require('util');
 const nat = require('../natural');
 const simpleTfidfTest = require('../simple-tf-idf-test');
 const simpleTfidf = require('../simple-tf-idf');
+const simpleTfidfDB = require('../simple-tf-idf-db');
+const saveDataFile = require('../save-data-file');
 
 let NUM = '10k';
 let server_tfidf = nat.load_document_file('/home/ksh/node-project/server/tfidf_DBdata_' + NUM);
 //console.log(server_tfidf);
 
-router.get('/api/saveTokenizedDBdata', (req, res) => {
+router.get('/api/saveDBdata', (req, res) => {
     let DBdata = [];
     db.query('select bid, title from board2', (err, rows) =>{
         DBdata = rows.map(v => Object.assign({}, v));
+        let data_num = '100k';
     
-        let natural = require('../natural.js');
         let document = [];
+        
         for(let i=0;i<10000;i++){
-            document.push(DBdata[i].title);
+            document.push(DBdata[i]);
         }
-        console.log(document);
-        
-        console.time('tokenize time');
-        let tokenized_document = natural.tokenizer(document);
-        console.log(tokenized_document);
-        console.timeEnd('tokenize time');
-        
         /*
-        for(let i=0;i<49;i++){
-            for(let j=0;j<10000;j++){
-                tokenized_document.push(tokenized_document[j]);
+        for(let i=0;i<9;i++){
+            for(let k=0;k<10000;k++){
+                document.push(DBdata[k]);
             }
         }
-        console.log(tokenized_document);
         */
         
-        let path = '/home/ksh/node-project/server/tokenized_DBdata';
-        natural.save_document_file(path, tokenized_document);
+        let path = './data/' + data_num +'_DBdata';
+        simpleTfidf.save_document_file(path, document);
         console.log('document number: ', document.length);
         res.send('done');
     });
 })
 
+router.get('/api/saveTokenDBdata', (req, res) => {
+    saveDataFile.save_token_DBdata();
+    res.send('done');
+})
+
 router.get('/api/saveTfidfDBdata', (req, res) => {
-    console.time('runtime');
-    let natural = require('../natural.js');
-    const fs = require('fs');
-    let document = [];
-    let num = NUM;
-    
-    // 미리 토큰화된 문서들 가져오기
-    console.time('read file time');
-    let path = '/home/ksh/node-project/server/tokenized_DBdata_' + num;
-    let tokenized_document = natural.load_document_file(path);
-    //console.log(tokenized_document);
-    console.timeEnd('read file time');
-    
-    // 모든 단어에 index 매핑
-    let result = natural.build_bag_of_words_DB(tokenized_document);
-    let vocab = result[0];
-    let bow = result[1];
-    let vocab_obj = [];
-    for(const [key, value] of vocab){
-        let temp_obj ={
-            key: key,
-            value: value
-        };
-        //console.log(key, value);
-        vocab_obj.push(temp_obj);
-    }
-    path = '/home/ksh/node-project/server/vocab_DBdata_' + num;
-    natural.save_document_file(path, vocab_obj);
-    //console.log('vocab: ', vocab);
-    //console.log('bow: ', bow);
-    
-    // 모든 단어의 idf 구하기
-    let idf = natural.get_idf_DB(bow, vocab);
-    path = '/home/ksh/node-project/server/idf_DBdata_' + num;
-    natural.save_document_file(path, idf);
-    
-    // 모든 문서의 tfidf 구하기
-    let tfidf = natural.get_tfidf_DB(bow, idf);
-    //console.log(tfidf);
-    
-    path = '/home/ksh/node-project/server/tfidf_DBdata_' + num;
-    natural.save_document_file(path, tfidf);
-    console.log('document number: ', tfidf.length);
-    console.timeEnd('runtime');
+    saveDataFile.save_tfidf_DBdata();
     res.send('done');
 });
+
+router.get('/api/NLPTokenFile', (req, res) => {
+    saveDataFile.NLP_token_file();
+    res.send('done');
+});
+
+router.get('/api/NLPTfidfFile', (req, res) => {
+    saveDataFile.NLP_tfidf_file();
+    res.send('done');
+});
+
+router.get('/api/NLPTokenFileTest', (req, res) => {
+    let time = [];
+    let sum = 0;
+    for(let i=0;i<10;i++){
+        let start = new Date();
+        saveDataFile.NLP_token_file();
+        let end = new Date();
+        let t = (end-start)/1000;
+        time.push(t);      
+        sum+=t;
+        console.log(10001);
+        console.log('function runtime : ', t, ' s');
+        console.log(time);
+        console.log('average time : ', sum/10);
+    }
+    res.send('done');
+});
+
 
 router.get('/api/NLPwithTfidfFile', async (req, res) => {
     console.time('runtime');
@@ -442,6 +428,7 @@ router.get('/api/NLPwithFile', async (req, res) => {
         bid: 0,
         title: '파이썬으로 크롤링하는 방법 질문이요',
     };
+    console.log(UserQ);
     
     // 유저의 질문과 토큰화된 문서 합치기
     let tokenized_UserQ = natural.tokenizer_DB(UserQ);
