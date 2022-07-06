@@ -9,7 +9,7 @@ const simpleTfidf = require('../simple-tf-idf');
 const simpleTfidfDB = require('../simple-tf-idf-db');
 const saveDataFile = require('../save-data-file');
 
-let NUM = '10k';
+let NUM = '100k';
 let server_tfidf = nat.load_document_file('/home/ksh/node-project/server/tfidf_DBdata_' + NUM);
 //console.log(server_tfidf);
 
@@ -17,11 +17,11 @@ router.get('/api/saveDBdata', (req, res) => {
     let DBdata = [];
     db.query('select bid, title from board2', (err, rows) =>{
         DBdata = rows.map(v => Object.assign({}, v));
-        let data_num = '100k';
+        let data_num = '10';
     
         let document = [];
         
-        for(let i=0;i<10000;i++){
+        for(let i=0;i<10;i++){
             document.push(DBdata[i]);
         }
         /*
@@ -69,7 +69,7 @@ router.get('/api/NLPTokenFileTest', (req, res) => {
         let t = (end-start)/1000;
         time.push(t);      
         sum+=t;
-        console.log(10001);
+        console.log(100001);
         console.log('function runtime : ', t, ' s');
         console.log(time);
         console.log('average time : ', sum/10);
@@ -77,6 +77,23 @@ router.get('/api/NLPTokenFileTest', (req, res) => {
     res.send('done');
 });
 
+router.get('/api/NLPTfidfFileTest', (req, res) => {
+    let time = [];
+    let sum = 0;
+    for(let i=0;i<10;i++){
+        let start = new Date();
+        saveDataFile.NLP_tfidf_file();
+        let end = new Date();
+        let t = (end-start)/1000;
+        time.push(t);      
+        sum+=t;
+        console.log(100001);
+        console.log('function runtime : ', t, ' s');
+        console.log(time);
+        console.log('average time : ', sum/10);
+    }
+    res.send('done');
+});
 
 router.get('/api/NLPwithTfidfFile', async (req, res) => {
     console.time('runtime');

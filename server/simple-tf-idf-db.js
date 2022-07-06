@@ -38,33 +38,65 @@ function build_bag_of_words(bid, tokenized_document){
     for(let index in tokenized_document){
         col_temp = [];
         data_temp = [];
+        let bow_temp = [];
+        let bow_obj = {};
         for(let word in tokenized_document[index]){
             let i = word_to_index.get(tokenized_document[index][word]);
 
-            if(col_temp.length === 0){
-                col_temp.push(i);
-                data_temp.push(1);
+            if(bow_temp.length === 0){
+                /*col_temp.push(i);
+                data_temp.push(1);*/
+                
+                // 오름차순을 위한 객체
+                bow_obj = {
+                    'col':i,
+                    'data':1,
+                }
+                bow_temp.push(bow_obj);
             }
             else{
                 let flag = 0;
-                for(let k in col_temp){
+                /*for(let k in col_temp){
                     if(col_temp[k] === i){
                         data_temp[k]++;
                         flag = 1;
                         break;
                     }
                 }
-
                 if(flag === 0){
                     col_temp.push(i);
                     data_temp.push(1);
+                }*/
+                
+                for(let k in bow_temp){
+                    if(bow_temp[k].col === i){
+                        bow_temp[k].data++;
+                        flag = 1;
+                        break;
+                    }
+                }
+                if(flag === 0){
+                    bow_obj = {
+                        'col':i,
+                        'data':1,
+                    }
+                    bow_temp.push(bow_obj);
                 }
             }
         }
-        row.push(col_temp.length + row[index]);
+        /*row.push(col_temp.length + row[index]);
         for(let i in col_temp){
             col.push(col_temp[i]);
             data.push(data_temp[i]);
+        }*/
+        
+        row.push(bow_temp.length + row[index]);
+        bow_temp.sort(function(a, b) {
+            return a.col - b.col;
+        });
+        for(let i in bow_temp){
+            col.push(bow_temp[i].col);
+            data.push(bow_temp[i].data);
         }
     }
 
@@ -172,6 +204,104 @@ function cosine_similarity(tfidf){
         else{
             // 스칼라곱이 0이 아니면 코사인 유사도 공식 사용
             cos_sim_temp = scalar_product / (normalized_zero * normalize(comp_data));
+            cos_sim_temp = Number(cos_sim_temp.toFixed(4));
+        }
+
+        let cos_sim_obj = {
+            'id':i,
+            'similarity':cos_sim_temp,
+        }
+        cos_sim.push(cos_sim_obj);
+    }
+    console.timeEnd('cal');
+    // 유사도 내림차순 정렬    
+    console.time('sort');
+    cos_sim.sort(function(a, b) {
+        return b.similarity - a.similarity;
+    });
+    console.timeEnd('sort');
+
+    // 상위 5개의 bid만 추출
+    let top5_cos_sim_id = [];
+    for(let i=1; i<6; i++){
+        console.log(cos_sim[i]);
+        top5_cos_sim_id.push(cos_sim[i].id);
+    }
+    
+    return top5_cos_sim_id;
+}
+
+function cosine_similarity_lastnum(tfidf){
+    // 마지막 문서와 다른 모든 문서를 비교해서 코사인 유사도를 구함
+    let cos_sim = [];
+    let cos_sim_id = [];
+    let N = tfidf.numberOfDocuments;
+    let last_row = tfidf.row[N] - tfidf.row[N-1];
+    let last_col = [];
+    let last_data = [];
+    let last_col_start_index = tfidf.col.length - last_row;
+    for(let i=last_col_start_index;i<tfidf.col.length;i++){// 마지막 문서의 colmun과 data를 추출
+        last_col.push(tfidf.col[i]);
+        last_data.push(tfidf.data[i]);
+    }
+    //console.log(last_col);
+    //console.log(last_data);
+    //console.log(tfidf);
+
+    let normalized_last = normalize(last_data);
+    console.time('cal');
+    for(let i=0;i<tfidf.numberOfDocuments;i++){// 전체 문서에 대해
+        let scalar_product = 0;
+        let comp_row = tfidf.row[i+1];
+        let comp_col = [];
+        let comp_data = [];
+        for(let j=tfidf.row[i];j<comp_row;j++){// i번 문서의 colmun과 data를 추출
+            comp_col.push(tfidf.col[j]);
+            comp_data.push(tfidf.data[j]);
+        }
+
+        // 스칼라곱 구하기
+        /*for(let j in last_data){// 마지막 문서의 tfidf 개수만큼
+            for(let k in comp_data){// i번 문서의 tfidf 개수만큼
+
+                // 마지막 문서의 tfidf벡터와 i번 문서의 tfidf벡터의 스칼라곱
+                if(last_col[j] === comp_col[k]){
+                    scalar_product += last_data[j] * comp_data[k];
+                    break;
+                }
+            }
+        }*/
+        
+        let last_pointer = 0;
+        let comp_pointer = 0;
+        let last_end = last_data.length - 1;
+        let comp_end = comp_data.length - 1;
+        while(1){
+            if(last_pointer>last_end || comp_pointer>comp_end){
+                break;
+            }
+            
+            if(last_col[last_pointer] === comp_col[comp_pointer]){
+                scalar_product += last_data[last_pointer] * comp_data[comp_pointer];
+                last_pointer++;
+                comp_pointer++;
+            }
+            else if(last_col[last_pointer] < comp_col[comp_pointer]){
+                last_pointer++;
+            }
+            else if(comp_col[comp_pointer] < last_col[last_pointer]){
+                comp_pointer++;
+            }
+        }
+
+        let cos_sim_temp = 0;
+        if(scalar_product === 0){
+            // 스칼라곱이 0이면 코사인 유사도는 0
+            cos_sim_temp = 0;
+        }
+        else{
+            // 스칼라곱이 0이 아니면 코사인 유사도 공식 사용
+            cos_sim_temp = scalar_product / (normalized_last * normalize(comp_data));
             cos_sim_temp = Number(cos_sim_temp.toFixed(4));
         }
 
@@ -295,6 +425,7 @@ module.exports = {
     get_idf,
     get_tfidf,
     cosine_similarity,
+    cosine_similarity_lastnum,
     similarity_test,
     similarity_test_token,
     save_document_file,

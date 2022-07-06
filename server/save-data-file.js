@@ -110,7 +110,7 @@ function NLP_tfidf_file(){
     
     let UserQ = {
         bid: 0,
-        title: '파이썬으로 크롤링하는 방법 크롤링 질문이요',
+        title: '파이썬으로 크롤링하는 방법 질문이요',
     };
     
     let temp = [];
@@ -149,16 +149,29 @@ function NLP_tfidf_file(){
     row_temp = 0;
     col_temp = [];
     data_temp = [];
+    let bow_temp = [];
+    let bow_obj = {};
     for(let word in tokenized_UserQ){
         let i = vocab.get(tokenized_UserQ[word]);
+        //console.log(tokenized_UserQ[word],' : ',i);
+        
+        if(i == null){
+            continue;
+        }
 
         if(col_temp.length === 0){
-            col_temp.push(i);
-            data_temp.push(1);
+            /*col_temp.push(i);
+            data_temp.push(1);*/
+
+            bow_obj = {
+                'col':i,
+                'data':1,
+            }
+            bow_temp.push(bow_obj);
         }
         else{
             let flag = 0;
-            for(let k in col_temp){
+            /*for(let k in col_temp){
                 if(col_temp[k] === i){
                     data_temp[k]++;
                     flag = 1;
@@ -169,13 +182,32 @@ function NLP_tfidf_file(){
             if(flag === 0){
                 col_temp.push(i);
                 data_temp.push(1);
+            }*/
+
+            for(let k in bow_temp){
+                if(bow_temp[k].col === i){
+                    bow_temp[k].data++;
+                    flag = 1;
+                    break;
+                }
+            }
+            if(flag === 0){
+                bow_obj = {
+                    'col':i,
+                    'data':1,
+                }
+                bow_temp.push(bow_obj);
             }
         }
     }
+    bow_temp.sort(function(a, b) {
+        return a.col - b.col;
+    });
+    for(let i in bow_temp){
+        col_temp.push(bow_temp[i].col);
+        data_temp.push(bow_temp[i].data);
+    }
     row_temp = col_temp.length;
-    //console.log(row_temp);
-    //console.log(col_temp);
-    //console.log(data_temp);
     
     // 유저 질문 tfidf 구하기
     for(let i in col_temp){
@@ -188,6 +220,7 @@ function NLP_tfidf_file(){
     
     // 유저 질문 tfidf를 미리 저장된 tfidf와 합침
     console.time('assemble');
+    /*// 0번 문서와 다른 문서를 비교
     for(let i in tfidf.row){
         tfidf.row[i] +=row_temp;
     }
@@ -198,12 +231,26 @@ function NLP_tfidf_file(){
         tfidf.col.unshift(col_temp[col_temp.length - 1 - i]);
         tfidf.data.unshift(data_temp[col_temp.length - 1 - i]);
     }
+    */
+    // 마지막 문서와 다른 문서를 비교
+    let N = tfidf.numberOfDocuments;
+    tfidf.numberOfDocuments++;
+    tfidf.row.push(tfidf.row[N] + row_temp);
+    tfidf.bid.push(0);
+    for(let i in col_temp){
+        tfidf.col.push(col_temp[i]);
+        tfidf.data.push(data_temp[i]);
+    }
+    
+    //console.log(row_temp);
+    //console.log(col_temp);
+    //console.log(data_temp);
     //console.log(tfidf);
     console.timeEnd('assemble');
     
     // 유저 질문 tfidf와 미리 저장된 tfidf값을 코사인 유사도 검사함
     console.time('user cos_sim time');
-    let cos_sim = simpleTfidfDB.cosine_similarity(tfidf);
+    let cos_sim = simpleTfidfDB.cosine_similarity_lastnum(tfidf);
     let top5bid = [];
     for(let i=0;i<5;i++){
         top5bid.push(tfidf.bid[cos_sim[i]]);
@@ -211,6 +258,15 @@ function NLP_tfidf_file(){
     console.log(cos_sim);
     console.log(top5bid);
     console.timeEnd('user cos_sim time');
+    
+    // tfidf에서 마지막 문서를 제거
+    tfidf.numberOfDocuments--;
+    tfidf.row.pop();
+    tfidf.bid.pop();
+    for(let i in col_temp){
+        tfidf.col.pop();
+        tfidf.data.pop();
+    }
     
     console.timeEnd('runtime');
 }
