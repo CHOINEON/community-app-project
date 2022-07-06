@@ -305,11 +305,13 @@ function cosine_similarity_lastnum(tfidf){
             cos_sim_temp = Number(cos_sim_temp.toFixed(4));
         }
 
-        let cos_sim_obj = {
-            'id':i,
-            'similarity':cos_sim_temp,
+        if(cos_sim_temp !== 0){
+            let cos_sim_obj = {
+                'id':i,
+                'similarity':cos_sim_temp,
+            }
+            cos_sim.push(cos_sim_obj);
         }
-        cos_sim.push(cos_sim_obj);
     }
     console.timeEnd('cal');
     // 유사도 오름차순 정렬    

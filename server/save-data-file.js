@@ -1,7 +1,7 @@
 const simpleTfidfDB = require('./simple-tf-idf-db');
 console.log('HI');
 
-let data_num = '1m';
+let data_num = '10k';
 let server_tfidf = simpleTfidfDB.load_document_file('./data/' + data_num +'_tfidf_DBdata');
 
 function save_token_DBdata(){
@@ -214,6 +214,13 @@ function NLP_tfidf_file(){
             }
         }
     }
+    
+    // 유저 질문과 유사한 문서가 없을 경우(단어사전에 유저의 질문 토큰이 없는 경우)
+    if(bow_temp.length === 0){
+        console.log('no similar post');
+        return;
+    }
+    
     bow_temp.sort(function(a, b) {
         return a.col - b.col;
     });
