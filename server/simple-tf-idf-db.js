@@ -305,7 +305,7 @@ function cosine_similarity_lastnum(tfidf){
             cos_sim_temp = Number(cos_sim_temp.toFixed(4));
         }
 
-        if(cos_sim_temp !== 0){
+        if(cos_sim_temp > 0.1){ // 유사도가 0.1이하면 넘어감
             let cos_sim_obj = {
                 'id':i,
                 'similarity':cos_sim_temp,
@@ -313,13 +313,19 @@ function cosine_similarity_lastnum(tfidf){
             cos_sim.push(cos_sim_obj);
         }
     }
+    // 유사한 문서가 없을 경우
+    if(cos_sim.length === 0){
+        console.log('no similar post');
+        return;
+    }
     console.timeEnd('cal');
-    // 유사도 오름차순 정렬    
+    // 유사도 내림차순 정렬    
     console.time('sort');
     cos_sim.sort(function(a, b) {
         return b.similarity - a.similarity;
     });
     console.timeEnd('sort');
+    //console.log(cos_sim);
 
     // 상위 5개의 bid만 추출
     let top5_cos_sim_id = [];

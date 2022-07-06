@@ -1,7 +1,7 @@
 const simpleTfidfDB = require('./simple-tf-idf-db');
 console.log('HI');
 
-let data_num = '10k';
+let data_num = '1m';
 let server_tfidf = simpleTfidfDB.load_document_file('./data/' + data_num +'_tfidf_DBdata');
 
 function save_token_DBdata(){
