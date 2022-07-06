@@ -1,7 +1,7 @@
 const simpleTfidfDB = require('./simple-tf-idf-db');
 console.log('HI');
 
-let data_num = '100k';
+let data_num = '1m';
 let server_tfidf = simpleTfidfDB.load_document_file('./data/' + data_num +'_tfidf_DBdata');
 
 function save_token_DBdata(){
@@ -15,6 +15,20 @@ function save_token_DBdata(){
     path = './data/' + data_num +'_token_DBdata';
     simpleTfidfDB.save_document_file(path, result);
     console.timeEnd('runtime');
+}
+
+function make_big_DBdata(){
+    let path = './data/10k_token_DBdata';
+    let result = simpleTfidfDB.load_document_file(path);
+    for(let i=0;i<99;i++){
+        for(let j=0;j<10000;j++){
+            result[0].push(result[0][j]);
+            result[1].push(result[1][j]);
+        }
+    }
+    
+    path = './data/1m_token_DBdata';
+    simpleTfidfDB.save_document_file(path, result);
 }
 
 function save_tfidf_DBdata(){
@@ -273,6 +287,7 @@ function NLP_tfidf_file(){
 
 module.exports = {
     save_token_DBdata,
+    make_big_DBdata,
     save_tfidf_DBdata,
     NLP_token_file,
     NLP_tfidf_file,

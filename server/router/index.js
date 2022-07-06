@@ -44,6 +44,11 @@ router.get('/api/saveTokenDBdata', (req, res) => {
     res.send('done');
 })
 
+router.get('/api/makeBigDBdata', (req, res) => {
+    saveDataFile.make_big_DBdata();
+    res.send('done');
+})
+
 router.get('/api/saveTfidfDBdata', (req, res) => {
     saveDataFile.save_tfidf_DBdata();
     res.send('done');
@@ -87,7 +92,7 @@ router.get('/api/NLPTfidfFileTest', (req, res) => {
         let t = (end-start)/1000;
         time.push(t);      
         sum+=t;
-        console.log(100001);
+        console.log(1000001);
         console.log('function runtime : ', t, ' s');
         console.log(time);
         console.log('average time : ', sum/10);
