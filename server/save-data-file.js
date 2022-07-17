@@ -1,8 +1,91 @@
 const simpleTfidfDB = require('./simple-tf-idf-db');
+const db = require('./dbconnection');
 console.log('HI');
 
-let data_num = '1m';
+let data_num = '50k';
 let server_tfidf = simpleTfidfDB.load_document_file('./data/' + data_num +'_tfidf_DBdata');
+console.log('load ' + data_num +'_tfidf_DBdata file to memory');
+
+function csv_to_DB(path){
+    console.log('csv to DB');
+    const fs = require('fs');
+    const csv = require('csv-parser');
+    const dataArray = [];
+    
+    fs.createReadStream(path)
+        .pipe(csv({delimiter: ','}))
+        .on("data", (row) => {
+            dataArray.push(row);
+        })
+        .on("end", () => {
+        
+        //console.log(dataArray);
+        
+        /*
+        // 중복 제거
+        for(var i in dataArray){
+          const iTitle = dataArray[i]["title"];
+          for(var j = 0;j < i;j++){
+            const jTitle = dataArray[j]["title"];
+            if(iTitle === jTitle){
+              dataArray.splice(j, 1);
+            }
+          }
+        }
+        */
+        
+        // db로 옮기기
+        let contentMax = 0;
+        let titleMax = 0;
+        for(var i in dataArray){
+           const title = dataArray[i]["title"];
+           const content = dataArray[i]["content"];
+           // max size 체크
+           if(contentMax<content.length){
+             contentMax = content.length;
+           }
+           if(titleMax<title.length){
+             titleMax = title.length;
+           }
+           
+           /*
+           db.query('insert into board2 (title, content)values (?,?)', [title, content], (err, rows)=>{
+             if(!err){
+             }
+             else{
+               console.log(err);
+             }
+           });*/
+        }
+        console.log(titleMax);
+        console.log(contentMax);
+    });
+}
+
+function save_DBdata_file(){
+    let DBdata = [];
+    db.query('select bid, title from board2', (err, rows) =>{
+        DBdata = rows.map(v => Object.assign({}, v));
+        let data_num = '50k';
+    
+        let document = [];
+        
+        for(let i=0;i<50000;i++){
+            document.push(DBdata[i]);
+        }
+        /*
+        for(let i=0;i<9;i++){
+            for(let k=0;k<10000;k++){
+                document.push(DBdata[k]);
+            }
+        }
+        */
+        
+        let path = './data/' + data_num +'_DBdata';
+        simpleTfidfDB.save_document_file(path, document);
+        console.log('document number: ', document.length);
+    });
+}
 
 function save_token_DBdata(){
     console.log('data_num : ', data_num);
@@ -124,7 +207,8 @@ function NLP_tfidf_file(){
     
     let UserQ = {
         bid: 0,
-        title: '파이썬으로 크롤링하는 방법 질문이요',
+        //title: '파이썬으로 크롤링하는 방법 질문이요',
+        title: 'natural language processing in Javascript',
     };
     
     let temp = [];
@@ -137,6 +221,7 @@ function NLP_tfidf_file(){
     
     console.time('read file time');
     // 미리 저장된 단어 사전 불러오기
+    console.time('read vocab time');
     let path = './data/' + data_num +'_vocab_DBdata';
     let vocab_file = simpleTfidfDB.load_document_file(path);
     let vocab = new Map();
@@ -144,11 +229,14 @@ function NLP_tfidf_file(){
         vocab.set(vocab_file[i].key, vocab_file[i].value);
     }
     //console.log(vocab);
+    console.timeEnd('read vocab time');
     
     // 미리 저장된 idf 불러오기
+    console.time('read idf time');
     path = './data/' + data_num +'_idf_DBdata';
     let idf = simpleTfidfDB.load_document_file(path);
     //console.log(idf);
+    console.timeEnd('read idf time');
     
     // 미리 저장된 tfidf 불러오기
     console.time('read tfidf time');
@@ -241,7 +329,7 @@ function NLP_tfidf_file(){
     
     // 유저 질문 tfidf를 미리 저장된 tfidf와 합침
     console.time('assemble');
-    /*// 0번 문서와 다른 문서를 비교
+    /*// 유저 질문tfidf를 0번에 넣어서 합침
     for(let i in tfidf.row){
         tfidf.row[i] +=row_temp;
     }
@@ -253,7 +341,7 @@ function NLP_tfidf_file(){
         tfidf.data.unshift(data_temp[col_temp.length - 1 - i]);
     }
     */
-    // 마지막 문서와 다른 문서를 비교
+    // 유저 질문 tfidf를 마지막 번호에 넣어서 합침
     let N = tfidf.numberOfDocuments;
     tfidf.numberOfDocuments++;
     tfidf.row.push(tfidf.row[N] + row_temp);
@@ -293,6 +381,8 @@ function NLP_tfidf_file(){
 }
 
 module.exports = {
+    csv_to_DB,
+    save_DBdata_file,
     save_token_DBdata,
     make_big_DBdata,
     save_tfidf_DBdata,

@@ -9,34 +9,19 @@ const simpleTfidf = require('../simple-tf-idf');
 const simpleTfidfDB = require('../simple-tf-idf-db');
 const saveDataFile = require('../save-data-file');
 
-let NUM = '100k';
+let NUM = '10k';
 let server_tfidf = nat.load_document_file('/home/ksh/node-project/server/tfidf_DBdata_' + NUM);
 //console.log(server_tfidf);
 
+router.get('/api/csvToDB', (req, res) =>{
+    let path = './data/csv/stackoverflow 50k.csv';
+    saveDataFile.csv_to_DB(path);
+    res.send('done');
+})
+
 router.get('/api/saveDBdata', (req, res) => {
-    let DBdata = [];
-    db.query('select bid, title from board2', (err, rows) =>{
-        DBdata = rows.map(v => Object.assign({}, v));
-        let data_num = '10';
-    
-        let document = [];
-        
-        for(let i=0;i<10;i++){
-            document.push(DBdata[i]);
-        }
-        /*
-        for(let i=0;i<9;i++){
-            for(let k=0;k<10000;k++){
-                document.push(DBdata[k]);
-            }
-        }
-        */
-        
-        let path = './data/' + data_num +'_DBdata';
-        simpleTfidf.save_document_file(path, document);
-        console.log('document number: ', document.length);
-        res.send('done');
-    });
+    saveDataFile.save_DBdata_file();
+    res.send('done');
 })
 
 router.get('/api/saveTokenDBdata', (req, res) => {
@@ -373,10 +358,31 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     res.send('done');
 });
 
+router.get('/api/postest', (req, res) => {
+    const mecab = require('mecab-ya');
+    const stopword = require('../stopword');
+    let document = '[헤럴드경제=최은지 기자] 김성한 국가안보실장은 10일 북한의 서해 지역 방사포로 추정되는 발사 항적과 관련해 군의 보고를 받고 대비태세를 점검했다.안드로이드 개발 중 \'XXX 앱을 중지했습니다\' 메세지와 강제 종료 I will Know how to i get the correct answer i\'Ll he\'ll';
+    
+    let tokens = mecab.posSync(document);
+    console.log(tokens);
+    
+    console.time('mecab nouns');
+    tokens = mecab.nounsSync(document);
+    console.log(tokens);
+    console.timeEnd('mecab nouns');
+    
+    console.time('stopword');
+    tokens = stopword.remove_stopwords(tokens);
+    console.log(tokens);
+    console.timeEnd('stopword');
+    
+    res.send('done');
+});
+
 router.get('/api/NLPtest', (req, res) => {
     let document = [];
-    document.push('정부가 발표하는 물가상승률과 소비자가 느끼는 물가상승률은 다르다.');
-    document.push('소비자는 주로 소비하는 상품을 기준으로 물가상승률을 느낀다.');
+    document.push('정부가 발표하는 물가상승률과 소비자가 #$@ 느끼는 물가상승률은 다르다. 혼자 훨씬 휘익 휴 흐흐I will Know how to i get the correct answer i\'Ll he\'ll python IMPORT');
+    document.push('소비자는 주로 소비하는 상품을 기준으로 물가상승률을 느낀다. 바꾸어 말하자면 위에서 서술한바와같이 경우에 종합한것과같이Python');
     console.log(document);
 
     simpleTfidfTest.similarity_test(document);
@@ -699,7 +705,7 @@ router.get('/api/getCsv', (req, res) => {
     //res.send('end');
 })
 
-router.get('/api/CSVToDB', (req, res) => {
+router.get('/api/CSVToDBtemp', (req, res) => {
     console.log('csv to DB');
     const fs = require('fs');
     const csv = require('csv-parser');

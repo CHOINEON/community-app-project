@@ -1,8 +1,15 @@
 function tokenizer(document){
-    let mecab = require('mecab-ya');
+    const mecab = require('mecab-ya');
+    const stopword = require('./stopword');
+    
     let tokenized_document = [];
     for(let i in document){
-        tokenized_document.push(mecab.nounsSync(document[i]));
+        let tokens = mecab.nounsSync(document[i]);
+        tokens = stopword.remove_stopwords(tokens);
+        for(let i in tokens){
+            tokens[i] = tokens[i].toLowerCase();
+        };
+        tokenized_document.push(tokens);
     }
     return tokenized_document;
 }
@@ -234,7 +241,6 @@ function cosine_similarity(tfidf){
 function cosine_similarity_lastnum(tfidf){
     // 마지막 문서와 다른 모든 문서를 비교해서 코사인 유사도를 구함
     let cos_sim = [];
-    let cos_sim_id = [];
     let N = tfidf.numberOfDocuments;
     let last_row = tfidf.row[N] - tfidf.row[N-1];
     let last_col = [];
@@ -272,6 +278,7 @@ function cosine_similarity_lastnum(tfidf){
             }
         }*/
         
+        // 스칼라곱 구하기 투포인터
         let last_pointer = 0;
         let comp_pointer = 0;
         let last_end = last_data.length - 1;
@@ -297,7 +304,8 @@ function cosine_similarity_lastnum(tfidf){
         let cos_sim_temp = 0;
         if(scalar_product === 0){
             // 스칼라곱이 0이면 코사인 유사도는 0
-            cos_sim_temp = 0;
+            continue;
+            //cos_sim_temp = 0;
         }
         else{
             // 스칼라곱이 0이 아니면 코사인 유사도 공식 사용

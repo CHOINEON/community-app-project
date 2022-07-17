@@ -1,8 +1,15 @@
 function tokenizer(document){
-    let mecab = require('mecab-ya');
+    const mecab = require('mecab-ya');
+    const stopword = require('./stopword');
+    
     let tokenized_document = [];
     for(let i in document){
-        tokenized_document.push(mecab.nounsSync(document[i]));
+        let tokens = mecab.nounsSync(document[i]);
+        tokens = stopword.remove_stopwords(tokens);
+        for(let i in tokens){
+            tokens[i] = tokens[i].toLowerCase();
+        };
+        tokenized_document.push(tokens);
     }
     return tokenized_document;
 }
