@@ -420,14 +420,26 @@ function load_document_file(path){
     return JSON.parse(readData.toString());
 }
 
-function tokenize_DBdata(path){
+function tokenize_DBdata(path, flag){
     let DBdata = load_document_file(path);
     let bid = [];
     let title = [];
-
-    for(let i in DBdata){
-        bid.push(DBdata[i].bid);
-        title.push(DBdata[i].title);
+    
+    if(flag === 'title'){
+      for(let i in DBdata){
+          bid.push(DBdata[i].bid);
+          title.push(DBdata[i].title);
+      }
+    }
+    else if(flag === 'content'){
+        for(let i in DBdata){
+          bid.push(DBdata[i].bid);
+          title.push(DBdata[i].title + DBdata[i].content);
+      }
+    }
+    else{
+        console.log('wrong flag');
+        return;
     }
 
     let tokenized_title = tokenizer(title);

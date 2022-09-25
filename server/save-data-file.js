@@ -2,7 +2,7 @@ const simpleTfidfDB = require('./simple-tf-idf-db');
 const db = require('./dbconnection');
 console.log('HI');
 
-let data_num = '50k';
+let data_num = '10';
 let server_tfidf = simpleTfidfDB.load_document_file('./data/' + data_num +'_tfidf_DBdata');
 console.log('load ' + data_num +'_tfidf_DBdata file to memory');
 
@@ -22,7 +22,7 @@ function csv_to_DB(path){
         //console.log(dataArray);
         
         /*
-        // ì¤‘ë³µ ì œê±°
+        // Áßº¹ Á¦°Å
         for(var i in dataArray){
           const iTitle = dataArray[i]["title"];
           for(var j = 0;j < i;j++){
@@ -34,13 +34,13 @@ function csv_to_DB(path){
         }
         */
         
-        // dbë¡œ ì˜®ê¸°ê¸°
+        // db·Î ¿Å±â±â
         let contentMax = 0;
         let titleMax = 0;
         for(var i in dataArray){
            const title = dataArray[i]["title"];
            const content = dataArray[i]["content"];
-           // max size ì²´í¬
+           // max size Ã¼Å©
            if(contentMax<content.length){
              contentMax = content.length;
            }
@@ -64,13 +64,12 @@ function csv_to_DB(path){
 
 function save_DBdata_file(){
     let DBdata = [];
-    db.query('select bid, title from board2', (err, rows) =>{
+    db.query('select bid, title, content from board2', (err, rows) =>{
         DBdata = rows.map(v => Object.assign({}, v));
-        let data_num = '50k';
-    
+        
         let document = [];
         
-        for(let i=0;i<50000;i++){
+        for(let i=0;i<10;i++){
             document.push(DBdata[i]);
         }
         /*
@@ -91,7 +90,8 @@ function save_token_DBdata(){
     console.log('data_num : ', data_num);
     console.time('runtime');
     let path = './data/' + data_num +'_DBdata';
-    let result = simpleTfidfDB.tokenize_DBdata(path);
+    let flag = 'content';
+    let result = simpleTfidfDB.tokenize_DBdata(path, flag);
     let bid = result[0];
     let title = result[1];
     
@@ -118,13 +118,13 @@ function save_tfidf_DBdata(){
     console.time('runtime');
     let document = [];
     
-    // ë¯¸ë¦¬ í† í°í™”ëœ DBdata ê°€ì ¸ì˜¤ê¸°
+    // ¹Ì¸® ÅäÅ«È­µÈ DBdata °¡Á®¿À±â
     let path = './data/' + data_num +'_token_DBdata';
     let token_DBdata = simpleTfidfDB.load_document_file(path);
     let bid = token_DBdata[0];
     let token_title = token_DBdata[1];
     
-    // ëª¨ë“  ë‹¨ì–´ì— index ë§¤í•‘
+    // ¸ðµç ´Ü¾î¿¡ index ¸ÅÇÎ
     let bow_result = simpleTfidfDB.build_bag_of_words(bid, token_title);
     let vocab = bow_result[0];
     let bow = bow_result[1];
@@ -139,12 +139,12 @@ function save_tfidf_DBdata(){
     path = './data/' + data_num +'_vocab_DBdata';
     simpleTfidfDB.save_document_file(path, vocab_obj);
     
-    // ëª¨ë“  ë‹¨ì–´ì˜ idf êµ¬í•˜ê¸°
+    // ¸ðµç ´Ü¾îÀÇ idf ±¸ÇÏ±â
     let idf = simpleTfidfDB.get_idf(bow, vocab);
     path = './data/' + data_num +'_idf_DBdata';
     simpleTfidfDB.save_document_file(path, idf);
     
-    // ëª¨ë“  ë¬¸ì„œì˜ tfidf êµ¬í•˜ê¸°
+    // ¸ðµç ¹®¼­ÀÇ tfidf ±¸ÇÏ±â
     let tfidf = simpleTfidfDB.get_tfidf(bow, idf);
     path = './data/' + data_num +'_tfidf_DBdata';
     simpleTfidfDB.save_document_file(path, tfidf);
@@ -152,12 +152,12 @@ function save_tfidf_DBdata(){
 }
 
 function NLP_token_file(){
-    // ë¯¸ë¦¬ í† í°í™”ëœ íŒŒì¼ê³¼ ì‚¬ìš©ìžì˜ ì§ˆë¬¸ ë¹„êµ
+    // ¹Ì¸® ÅäÅ«È­µÈ ÆÄÀÏ°ú »ç¿ëÀÚÀÇ Áú¹® ºñ±³
     
     console.time('runtime');
     let document = [];
     
-    // ë¯¸ë¦¬ í† í°í™”ëœ DBdata ê°€ì ¸ì˜¤ê¸°
+    // ¹Ì¸® ÅäÅ«È­µÈ DBdata °¡Á®¿À±â
     let path = './data/' + data_num +'_token_DBdata';
     let token_DBdata = simpleTfidfDB.load_document_file(path);
     let bid = token_DBdata[0];
@@ -165,29 +165,29 @@ function NLP_token_file(){
     
     let UserQ = {
         bid: 0,
-        title: 'íŒŒì´ì¬ìœ¼ë¡œ í¬ë¡¤ë§í•˜ëŠ” ë°©ë²• ì§ˆë¬¸ì´ìš”',
+        title: 'ÆÄÀÌ½ãÀ¸·Î Å©·Ñ¸µÇÏ´Â ¹æ¹ý Áú¹®ÀÌ¿ä',
     };
     
     let temp = [];
     temp.push(UserQ.title);
     
-    // ìœ ì €ì˜ ì§ˆë¬¸ê³¼ í† í°í™”ëœ ë¬¸ì„œ í•©ì¹˜ê¸°
+    // À¯ÀúÀÇ Áú¹®°ú ÅäÅ«È­µÈ ¹®¼­ ÇÕÄ¡±â
     let tokenized_UserQ = simpleTfidfDB.tokenizer(temp);
     bid.unshift(UserQ.bid);
     token_title.unshift(tokenized_UserQ[0]);
 
-    // ëª¨ë“  ë‹¨ì–´ì— index ë§¤í•‘
+    // ¸ðµç ´Ü¾î¿¡ index ¸ÅÇÎ
     let result = simpleTfidfDB.build_bag_of_words(bid, token_title);
     let vocab = result[0];
     let bow = result[1];
     
-    // ëª¨ë“  ë‹¨ì–´ì˜ idf êµ¬í•˜ê¸°
+    // ¸ðµç ´Ü¾îÀÇ idf ±¸ÇÏ±â
     let idf = simpleTfidfDB.get_idf(bow, vocab);
     
-    // ëª¨ë“  ë¬¸ì„œì˜ tfidf êµ¬í•˜ê¸°
+    // ¸ðµç ¹®¼­ÀÇ tfidf ±¸ÇÏ±â
     let tfidf = simpleTfidfDB.get_tfidf(bow, idf);
      
-    // 0ë²ˆ ë¬¸ì„œì™€ ë‚˜ë¨¸ì§€ ë¬¸ì„œì˜ ìœ ì‚¬ë„ ê²€ì‚¬
+    // 0¹ø ¹®¼­¿Í ³ª¸ÓÁö ¹®¼­ÀÇ À¯»çµµ °Ë»ç
     let cos_sim = simpleTfidfDB.cosine_similarity(tfidf);
     
     let top5bid = [];
@@ -200,27 +200,27 @@ function NLP_token_file(){
 }
 
 function NLP_tfidf_file(){
-    // ë¯¸ë¦¬ ê³„ì‚°ëœ tfidf íŒŒì¼ê³¼ ì‚¬ìš©ìžì˜ ì§ˆë¬¸ ë¹„êµ
+    // ¹Ì¸® °è»êµÈ tfidf ÆÄÀÏ°ú »ç¿ëÀÚÀÇ Áú¹® ºñ±³
     
     console.time('runtime');
     let document = [];
     
     let UserQ = {
         bid: 0,
-        //title: 'íŒŒì´ì¬ìœ¼ë¡œ í¬ë¡¤ë§í•˜ëŠ” ë°©ë²• ì§ˆë¬¸ì´ìš”',
+        //title: 'ÆÄÀÌ½ãÀ¸·Î Å©·Ñ¸µÇÏ´Â ¹æ¹ý Áú¹®ÀÌ¿ä',
         title: 'natural language processing in Javascript',
     };
     
     let temp = [];
     temp.push(UserQ.title);
     
-    // ìœ ì € ì§ˆë¬¸ í† í°í™”
+    // À¯Àú Áú¹® ÅäÅ«È­
     let tokenized_UserQ = simpleTfidfDB.tokenizer(temp);
     tokenized_UserQ = tokenized_UserQ[0];
     console.log(tokenized_UserQ);
     
     console.time('read file time');
-    // ë¯¸ë¦¬ ì €ìž¥ëœ ë‹¨ì–´ ì‚¬ì „ ë¶ˆëŸ¬ì˜¤ê¸°
+    // ¹Ì¸® ÀúÀåµÈ ´Ü¾î »çÀü ºÒ·¯¿À±â
     console.time('read vocab time');
     let path = './data/' + data_num +'_vocab_DBdata';
     let vocab_file = simpleTfidfDB.load_document_file(path);
@@ -231,14 +231,14 @@ function NLP_tfidf_file(){
     //console.log(vocab);
     console.timeEnd('read vocab time');
     
-    // ë¯¸ë¦¬ ì €ìž¥ëœ idf ë¶ˆëŸ¬ì˜¤ê¸°
+    // ¹Ì¸® ÀúÀåµÈ idf ºÒ·¯¿À±â
     console.time('read idf time');
     path = './data/' + data_num +'_idf_DBdata';
     let idf = simpleTfidfDB.load_document_file(path);
     //console.log(idf);
     console.timeEnd('read idf time');
     
-    // ë¯¸ë¦¬ ì €ìž¥ëœ tfidf ë¶ˆëŸ¬ì˜¤ê¸°
+    // ¹Ì¸® ÀúÀåµÈ tfidf ºÒ·¯¿À±â
     console.time('read tfidf time');
     path = './data/' + data_num +'_tfidf_DBdata';
     //let tfidf = simpleTfidfDB.load_document_file(path);
@@ -247,7 +247,7 @@ function NLP_tfidf_file(){
     console.timeEnd('read tfidf time');
     console.timeEnd('read file time');
     
-    // ìœ ì € ì§ˆë¬¸ tf êµ¬í•˜ê¸°
+    // À¯Àú Áú¹® tf ±¸ÇÏ±â
     row_temp = 0;
     col_temp = [];
     data_temp = [];
@@ -303,7 +303,7 @@ function NLP_tfidf_file(){
         }
     }
     
-    // ìœ ì € ì§ˆë¬¸ê³¼ ìœ ì‚¬í•œ ë¬¸ì„œê°€ ì—†ì„ ê²½ìš°(ë‹¨ì–´ì‚¬ì „ì— ìœ ì €ì˜ ì§ˆë¬¸ í† í°ì´ ì—†ëŠ” ê²½ìš°)
+    // À¯Àú Áú¹®°ú À¯»çÇÑ ¹®¼­°¡ ¾øÀ» °æ¿ì(´Ü¾î»çÀü¿¡ À¯ÀúÀÇ Áú¹® ÅäÅ«ÀÌ ¾ø´Â °æ¿ì)
     if(bow_temp.length === 0){
         console.log('no similar post');
         return;
@@ -318,7 +318,7 @@ function NLP_tfidf_file(){
     }
     row_temp = col_temp.length;
     
-    // ìœ ì € ì§ˆë¬¸ tfidf êµ¬í•˜ê¸°
+    // À¯Àú Áú¹® tfidf ±¸ÇÏ±â
     for(let i in col_temp){
         data_temp[i] = data_temp[i] * idf[col_temp[i]];
     }
@@ -327,9 +327,9 @@ function NLP_tfidf_file(){
     //console.log(data_temp);
     //console.log(tfidf);
     
-    // ìœ ì € ì§ˆë¬¸ tfidfë¥¼ ë¯¸ë¦¬ ì €ìž¥ëœ tfidfì™€ í•©ì¹¨
+    // À¯Àú Áú¹® tfidf¸¦ ¹Ì¸® ÀúÀåµÈ tfidf¿Í ÇÕÄ§
     console.time('assemble');
-    /*// ìœ ì € ì§ˆë¬¸tfidfë¥¼ 0ë²ˆì— ë„£ì–´ì„œ í•©ì¹¨
+    /*// À¯Àú Áú¹®tfidf¸¦ 0¹ø¿¡ ³Ö¾î¼­ ÇÕÄ§
     for(let i in tfidf.row){
         tfidf.row[i] +=row_temp;
     }
@@ -341,7 +341,7 @@ function NLP_tfidf_file(){
         tfidf.data.unshift(data_temp[col_temp.length - 1 - i]);
     }
     */
-    // ìœ ì € ì§ˆë¬¸ tfidfë¥¼ ë§ˆì§€ë§‰ ë²ˆí˜¸ì— ë„£ì–´ì„œ í•©ì¹¨
+    // À¯Àú Áú¹® tfidf¸¦ ¸¶Áö¸· ¹øÈ£¿¡ ³Ö¾î¼­ ÇÕÄ§
     let N = tfidf.numberOfDocuments;
     tfidf.numberOfDocuments++;
     tfidf.row.push(tfidf.row[N] + row_temp);
@@ -357,7 +357,7 @@ function NLP_tfidf_file(){
     //console.log(tfidf);
     console.timeEnd('assemble');
     
-    // ìœ ì € ì§ˆë¬¸ tfidfì™€ ë¯¸ë¦¬ ì €ìž¥ëœ tfidfê°’ì„ ì½”ì‚¬ì¸ ìœ ì‚¬ë„ ê²€ì‚¬í•¨
+    // À¯Àú Áú¹® tfidf¿Í ¹Ì¸® ÀúÀåµÈ tfidf°ªÀ» ÄÚ»çÀÎ À¯»çµµ °Ë»çÇÔ
     console.time('user cos_sim time');
     let cos_sim = simpleTfidfDB.cosine_similarity_lastnum(tfidf);
     let top5bid = [];
@@ -368,7 +368,7 @@ function NLP_tfidf_file(){
     console.log(top5bid);
     console.timeEnd('user cos_sim time');
     
-    // tfidfì—ì„œ ë§ˆì§€ë§‰ ë¬¸ì„œë¥¼ ì œê±°
+    // tfidf¿¡¼­ ¸¶Áö¸· ¹®¼­¸¦ Á¦°Å
     tfidf.numberOfDocuments--;
     tfidf.row.pop();
     tfidf.bid.pop();
