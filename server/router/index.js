@@ -13,6 +13,21 @@ let NUM = '10k';
 let server_tfidf = nat.load_document_file('/home/ksh/node-project/server/tfidf_DBdata_' + NUM);
 //console.log(server_tfidf);
 
+router.get('/api/home', (req, res) =>{
+    let DBdata = [];
+    db.query('select bid, title, content from board2 Limit 20', (err, rows) =>{
+        DBdata = rows.map(v => Object.assign({}, v));
+        for(var i in DBdata){
+          if(DBdata[i].content.length>200){
+            DBdata[i].content = DBdata[i].content.slice(0,200);
+            DBdata[i].content += '...';
+          }
+        }
+        //console.log(DBdata);
+        res.send(DBdata);
+    });
+});
+
 router.get('/api/csvToDB', (req, res) =>{
     let path = './data/csv/stackoverflow 50k.csv';
     saveDataFile.csv_to_DB(path);

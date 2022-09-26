@@ -1,11 +1,85 @@
 import './App.css';
+import { Reset } from 'styled-reset';
+import styled, {createGlobalStyle} from 'styled-components';
+import Header from "./Header";
+import QuestionsPage from "./QuestionsPage"
+import styles from './App.module.css';
 import React, { useState, useEffect } from 'react'
 import axios from 'axios';
 
-function Signup(){
+const GlobalStyles = createGlobalStyle`
+  body{
+    background: #fff;
+    color:#2d2d2d;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+`
 
+function App(){
+  return(
+    <div>
+      <Reset/>
+      <GlobalStyles/>
+      <Header/>
+      <QuestionsPage/>
+    </div>
+  )
 }
 
+/*
+function App(){
+  const [loading, setLoading] = useState(true);
+  const [coins, setCoins] = useState([]);
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((response) => response.json())
+      .then((json) => {
+        setCoins(json);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <div>
+      <h1>The Coins</h1>
+      {loading ? <strong>Loading...</strong> : null}
+      <ul>
+        {coins.map((coin) => (
+          <li>
+            {coin.name} : ${coin.quotes.USD.price}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+*/
+/*
+function App(){
+  const [keyword, setKeyword] = useState("");
+  const onChange = (event) => setKeyword(event.target.value);
+  useEffect(() => {
+    console.log("run only once");
+  }, []);
+  useEffect(() => {
+    if (keyword !== "" && keyword.length > 5){
+      console.log("SEARCH FOR", keyword);
+    }
+  }, [keyword]);
+  return(
+    <div>
+      <h1 className={styles.title}>Welcome</h1>
+      <input 
+      value={keyword} 
+      onChange={onChange} 
+      type="text" 
+      placeholder='Search here...'></input>
+    </div>
+  )
+}
+*/
+
+/*
 function App(){
 
   const [inputId, setInputId] = useState(null);
@@ -158,7 +232,7 @@ function App(){
   
   return(
     <div>
-      {/* <h2>DB Test</h2>
+      <h2>DB Test</h2>
       <button>btn</button>
       <button onClick={getServerData}>btn2</button>
       <button onClick={getServerData2}>btn3</button>
@@ -171,7 +245,8 @@ function App(){
         </form>
         <button onClick={onClickLogin2}>로그인2</button>
         <button onClick={onClickLogin3}>로그인3</button>
-      </div> */}
+      </div> 
+      
 
       <h2>예상 답변 테스트</h2>
       <form action='/api/expectdAnswer'>
@@ -181,4 +256,6 @@ function App(){
     </div>
   )
 }
+*/
+
 export default App;
