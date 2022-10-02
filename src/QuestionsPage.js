@@ -43,6 +43,7 @@ function QuestionsPage(){
             <div>
                 {posts.map((post) => (
                     <QuestionRow 
+                        key={post.bid}
                         bid={post.bid} 
                         title={post.title} 
                         content={post.content}
