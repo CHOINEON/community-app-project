@@ -28,6 +28,17 @@ router.get('/api/home', (req, res) =>{
     });
 });
 
+router.post('/api/questionDetail', (req, res) => {
+    console.log(req.body);
+    const Question_id = req.body?.id;
+    console.log(`Qeustion ${Question_id} Detail Request`);
+    
+    db.query('select bid, title, content from board2 where bid=?', [Question_id], (err, rows)=>{
+        console.log(rows);
+        res.send(rows);
+    })
+})
+
 router.get('/api/csvToDB', (req, res) =>{
     let path = './data/csv/stackoverflow 50k.csv';
     saveDataFile.csv_to_DB(path);
@@ -108,15 +119,15 @@ router.get('/api/NLPwithTfidfFile', async (req, res) => {
     
     let UserQ = {
         bid: 0,
-        title: 'ÆÄÀÌ½ãÀ¸·Î Å©·Ñ¸µÇÏ´Â ¹æ¹ı Áú¹®ÀÌ¿ä',
+        title: 'íŒŒì´ì¬ìœ¼ë¡œ í¬ë¡¤ë§í•˜ëŠ” ë°©ë²• ì§ˆë¬¸ì´ìš”',
     };
     
-    // À¯Àú Áú¹® ÅäÅ«È­
+    // ìœ ì € ì§ˆë¬¸ í† í°í™”
     let tokenized_UserQ = natural.tokenizer_DB(UserQ);
     //console.log(tokenized_UserQ);
     
     console.time('read file time');
-    // ¹Ì¸® ÀúÀåµÈ ´Ü¾î »çÀü ºÒ·¯¿À±â
+    // ë¯¸ë¦¬ ì €ì¥ëœ ë‹¨ì–´ ì‚¬ì „ ë¶ˆëŸ¬ì˜¤ê¸°
     let path = '/home/ksh/node-project/server/vocab_DBdata_' + num;
     let vocab_file = natural.load_document_file(path);
     let vocab = new Map();
@@ -126,12 +137,12 @@ router.get('/api/NLPwithTfidfFile', async (req, res) => {
     }
     //console.log(vocab);
     
-    // ¹Ì¸® ÀúÀåµÈ idf ºÒ·¯¿À±â
+    // ë¯¸ë¦¬ ì €ì¥ëœ idf ë¶ˆëŸ¬ì˜¤ê¸°
     path = '/home/ksh/node-project/server/idf_DBdata_' + num;
     let idf = natural.load_document_file(path);
     //console.log(idf);
     
-    // ¹Ì¸® ÀúÀåµÈ tfidf ºÒ·¯¿À±â
+    // ë¯¸ë¦¬ ì €ì¥ëœ tfidf ë¶ˆëŸ¬ì˜¤ê¸°
     console.time('read tfidf time');
     //path = '/home/ksh/node-project/server/tfidf_DBdata_' + num;
     //let tfidf = natural.load_document_file(path);
@@ -140,7 +151,7 @@ router.get('/api/NLPwithTfidfFile', async (req, res) => {
     console.timeEnd('read tfidf time');
     console.timeEnd('read file time');
     
-    // À¯Àú Áú¹® ÅäÅ«ÀÌ ´Ü¾î »çÀü¿¡ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
+    // ìœ ì € ì§ˆë¬¸ í† í°ì´ ë‹¨ì–´ ì‚¬ì „ì— ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸
     let token_matched_index = [];
     for(let i in tokenized_UserQ.title){
         let index = vocab.get(tokenized_UserQ.title[i]);
@@ -155,7 +166,7 @@ router.get('/api/NLPwithTfidfFile', async (req, res) => {
     }
     //console.log(token_matched_index);
     
-    // À¯Àú Áú¹® tf ±¸ÇÏ±â
+    // ìœ ì € ì§ˆë¬¸ tf êµ¬í•˜ê¸°
     let bow_obj_UserQ = {};
     let bow_temp = [];
     for(let i in token_matched_index){
@@ -191,7 +202,7 @@ router.get('/api/NLPwithTfidfFile', async (req, res) => {
     };
     //console.log(bow_obj_UserQ);
     
-    // À¯Àú Áú¹® tfidf ±¸ÇÏ±â
+    // ìœ ì € ì§ˆë¬¸ tfidf êµ¬í•˜ê¸°
     let tfidf_obj_UserQ = {};
     let tfidf_temp = [];
     for(let i in bow_obj_UserQ.bow){
@@ -211,11 +222,11 @@ router.get('/api/NLPwithTfidfFile', async (req, res) => {
     };
     //console.log(tfidf_obj_UserQ);
     
-    // À¯Àú Áú¹® tfidf¸¦ ¹Ì¸® ÀúÀåµÈ tfidf¿Í ÇÕÄ§
+    // ìœ ì € ì§ˆë¬¸ tfidfë¥¼ ë¯¸ë¦¬ ì €ì¥ëœ tfidfì™€ í•©ì¹¨
     tfidf.unshift(tfidf_obj_UserQ);
     //console.log(tfidf);
     
-    // À¯Àú Áú¹® tfidf¿Í ¹Ì¸® ÀúÀåµÈ tfidf°ªÀ» ÄÚ»çÀÎ À¯»çµµ °Ë»çÇÔ
+    // ìœ ì € ì§ˆë¬¸ tfidfì™€ ë¯¸ë¦¬ ì €ì¥ëœ tfidfê°’ì„ ì½”ì‚¬ì¸ ìœ ì‚¬ë„ ê²€ì‚¬í•¨
     let cos_sim = natural.cosine_similarity_DB(tfidf);
     console.log(cos_sim);
     
@@ -231,10 +242,10 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     
     let UserQ = {
         bid: 0,
-        title: 'ÆÄÀÌ½ãÀ¸·Î Å©·Ñ¸µÇÏ´Â ¹æ¹ı Áú¹®ÀÌ¿ä',
+        title: 'íŒŒì´ì¬ìœ¼ë¡œ í¬ë¡¤ë§í•˜ëŠ” ë°©ë²• ì§ˆë¬¸ì´ìš”',
     };
     
-    // À¯Àú Áú¹® ÅäÅ«È­
+    // ìœ ì € ì§ˆë¬¸ í† í°í™”
     let tokenized_UserQ = natural.tokenizer_DB(UserQ);
     //console.log(tokenized_UserQ);
     
@@ -249,7 +260,7 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     let start_run = new Date;
     
     
-    // ¹Ì¸® ÀúÀåµÈ ´Ü¾î »çÀü ºÒ·¯¿À±â
+    // ë¯¸ë¦¬ ì €ì¥ëœ ë‹¨ì–´ ì‚¬ì „ ë¶ˆëŸ¬ì˜¤ê¸°
     let path = '/home/ksh/node-project/server/vocab_DBdata_100k';
     let vocab_file = natural.load_document_file(path);
     let vocab = new Map();
@@ -259,12 +270,12 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     }
     //console.log(vocab);
     
-    // ¹Ì¸® ÀúÀåµÈ idf ºÒ·¯¿À±â
+    // ë¯¸ë¦¬ ì €ì¥ëœ idf ë¶ˆëŸ¬ì˜¤ê¸°
     path = '/home/ksh/node-project/server/idf_DBdata_100k';
     let idf = natural.load_document_file(path);
     //console.log(idf);
     
-    // ¹Ì¸® ÀúÀåµÈ tfidf ºÒ·¯¿À±â
+    // ë¯¸ë¦¬ ì €ì¥ëœ tfidf ë¶ˆëŸ¬ì˜¤ê¸°
     //path = '/home/ksh/node-project/server/tfidf_DBdata_100k';
     //let tfidf = natural.load_document_file(path);
     let tfidf = server_tfidf;
@@ -274,7 +285,7 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     sum_file+=temp;
     time_file.push(temp);
     
-    // À¯Àú Áú¹® ÅäÅ«ÀÌ ´Ü¾î »çÀü¿¡ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
+    // ìœ ì € ì§ˆë¬¸ í† í°ì´ ë‹¨ì–´ ì‚¬ì „ì— ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸
     let token_matched_index = [];
     for(let i in tokenized_UserQ.title){
         let index = vocab.get(tokenized_UserQ.title[i]);
@@ -289,7 +300,7 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     }
     //console.log(token_matched_index);
     
-    // À¯Àú Áú¹® tf ±¸ÇÏ±â
+    // ìœ ì € ì§ˆë¬¸ tf êµ¬í•˜ê¸°
     let bow_obj_UserQ = {};
     let bow_temp = [];
     for(let i in token_matched_index){
@@ -325,7 +336,7 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     };
     //console.log(bow_obj_UserQ);
     
-    // À¯Àú Áú¹® tfidf ±¸ÇÏ±â
+    // ìœ ì € ì§ˆë¬¸ tfidf êµ¬í•˜ê¸°
     let tfidf_obj_UserQ = {};
     let tfidf_temp = [];
     for(let i in bow_obj_UserQ.bow){
@@ -345,11 +356,11 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
     };
     //console.log(tfidf_obj_UserQ);
     
-    // À¯Àú Áú¹® tfidf¸¦ ¹Ì¸® ÀúÀåµÈ tfidf¿Í ÇÕÄ§
+    // ìœ ì € ì§ˆë¬¸ tfidfë¥¼ ë¯¸ë¦¬ ì €ì¥ëœ tfidfì™€ í•©ì¹¨
     tfidf.unshift(tfidf_obj_UserQ);
     //console.log(tfidf);
     
-    // À¯Àú Áú¹® tfidf¿Í ¹Ì¸® ÀúÀåµÈ tfidf°ªÀ» ÄÚ»çÀÎ À¯»çµµ °Ë»çÇÔ
+    // ìœ ì € ì§ˆë¬¸ tfidfì™€ ë¯¸ë¦¬ ì €ì¥ëœ tfidfê°’ì„ ì½”ì‚¬ì¸ ìœ ì‚¬ë„ ê²€ì‚¬í•¨
     let cos_sim = natural.cosine_similarity_DB(tfidf);
     console.log(cos_sim);
     
@@ -376,7 +387,7 @@ router.get('/api/NLPwithTfidfFileTest', async (req, res) => {
 router.get('/api/postest', (req, res) => {
     const mecab = require('mecab-ya');
     const stopword = require('../stopword');
-    let document = '[Çì·²µå°æÁ¦=ÃÖÀºÁö ±âÀÚ] ±è¼ºÇÑ ±¹°¡¾Èº¸½ÇÀåÀº 10ÀÏ ºÏÇÑÀÇ ¼­ÇØ Áö¿ª ¹æ»çÆ÷·Î ÃßÁ¤µÇ´Â ¹ß»ç Ç×Àû°ú °ü·ÃÇØ ±ºÀÇ º¸°í¸¦ ¹Ş°í ´ëºñÅÂ¼¼¸¦ Á¡°ËÇß´Ù.¾Èµå·ÎÀÌµå °³¹ß Áß \'XXX ¾ÛÀ» ÁßÁöÇß½À´Ï´Ù\' ¸Ş¼¼Áö¿Í °­Á¦ Á¾·á I will Know how to i get the correct answer i\'Ll he\'ll';
+    let document = '[í—¤ëŸ´ë“œê²½ì œ=ìµœì€ì§€ ê¸°ì] ê¹€ì„±í•œ êµ­ê°€ì•ˆë³´ì‹¤ì¥ì€ 10ì¼ ë¶í•œì˜ ì„œí•´ ì§€ì—­ ë°©ì‚¬í¬ë¡œ ì¶”ì •ë˜ëŠ” ë°œì‚¬ í•­ì ê³¼ ê´€ë ¨í•´ êµ°ì˜ ë³´ê³ ë¥¼ ë°›ê³  ëŒ€ë¹„íƒœì„¸ë¥¼ ì ê²€í–ˆë‹¤.ì•ˆë“œë¡œì´ë“œ ê°œë°œ ì¤‘ \'XXX ì•±ì„ ì¤‘ì§€í–ˆìŠµë‹ˆë‹¤\' ë©”ì„¸ì§€ì™€ ê°•ì œ ì¢…ë£Œ I will Know how to i get the correct answer i\'Ll he\'ll';
     
     let tokens = mecab.posSync(document);
     console.log(tokens);
@@ -396,8 +407,8 @@ router.get('/api/postest', (req, res) => {
 
 router.get('/api/NLPtest', (req, res) => {
     let document = [];
-    document.push('Á¤ºÎ°¡ ¹ßÇ¥ÇÏ´Â ¹°°¡»ó½Â·ü°ú ¼ÒºñÀÚ°¡ #$@ ´À³¢´Â ¹°°¡»ó½Â·üÀº ´Ù¸£´Ù. È¥ÀÚ ÈÎ¾À ÈÖÀÍ ÈŞ ÈåÈåI will Know how to i get the correct answer i\'Ll he\'ll python IMPORT');
-    document.push('¼ÒºñÀÚ´Â ÁÖ·Î ¼ÒºñÇÏ´Â »óÇ°À» ±âÁØÀ¸·Î ¹°°¡»ó½Â·üÀ» ´À³¤´Ù. ¹Ù²Ù¾î ¸»ÇÏÀÚ¸é À§¿¡¼­ ¼­¼úÇÑ¹Ù¿Í°°ÀÌ °æ¿ì¿¡ Á¾ÇÕÇÑ°Í°ú°°ÀÌPython');
+    document.push('ì •ë¶€ê°€ ë°œí‘œí•˜ëŠ” ë¬¼ê°€ìƒìŠ¹ë¥ ê³¼ ì†Œë¹„ìê°€ #$@ ëŠë¼ëŠ” ë¬¼ê°€ìƒìŠ¹ë¥ ì€ ë‹¤ë¥´ë‹¤. í˜¼ì í›¨ì”¬ íœ˜ìµ íœ´ ííI will Know how to i get the correct answer i\'Ll he\'ll python IMPORT');
+    document.push('ì†Œë¹„ìëŠ” ì£¼ë¡œ ì†Œë¹„í•˜ëŠ” ìƒí’ˆì„ ê¸°ì¤€ìœ¼ë¡œ ë¬¼ê°€ìƒìŠ¹ë¥ ì„ ëŠë‚€ë‹¤. ë°”ê¾¸ì–´ ë§í•˜ìë©´ ìœ„ì—ì„œ ì„œìˆ í•œë°”ì™€ê°™ì´ ê²½ìš°ì— ì¢…í•©í•œê²ƒê³¼ê°™ì´Python');
     console.log(document);
 
     simpleTfidfTest.similarity_test(document);
@@ -460,7 +471,7 @@ router.get('/api/NLPwithFile', async (req, res) => {
     let document = [];
     let num = NUM;
     
-    // ¹Ì¸® ÅäÅ«È­µÈ ¹®¼­µé °¡Á®¿À±â
+    // ë¯¸ë¦¬ í† í°í™”ëœ ë¬¸ì„œë“¤ ê°€ì ¸ì˜¤ê¸°
     console.time('read file time');
     let path = '/home/ksh/node-project/server/tokenized_DBdata_' + num;
     let tokenized_document = natural.load_document_file(path);
@@ -469,27 +480,27 @@ router.get('/api/NLPwithFile', async (req, res) => {
     
     let UserQ = {
         bid: 0,
-        title: 'ÆÄÀÌ½ãÀ¸·Î Å©·Ñ¸µÇÏ´Â ¹æ¹ı Áú¹®ÀÌ¿ä',
+        title: 'íŒŒì´ì¬ìœ¼ë¡œ í¬ë¡¤ë§í•˜ëŠ” ë°©ë²• ì§ˆë¬¸ì´ìš”',
     };
     console.log(UserQ);
     
-    // À¯ÀúÀÇ Áú¹®°ú ÅäÅ«È­µÈ ¹®¼­ ÇÕÄ¡±â
+    // ìœ ì €ì˜ ì§ˆë¬¸ê³¼ í† í°í™”ëœ ë¬¸ì„œ í•©ì¹˜ê¸°
     let tokenized_UserQ = natural.tokenizer_DB(UserQ);
     tokenized_document.unshift(tokenized_UserQ);
     //console.log(tokenized_document);
 
-    // ¸ğµç ´Ü¾î¿¡ index ¸ÅÇÎ
+    // ëª¨ë“  ë‹¨ì–´ì— index ë§¤í•‘
     let result = natural.build_bag_of_words_DB(tokenized_document);
     let vocab = result[0];
     let bow = result[1];
     
-    // ¸ğµç ´Ü¾îÀÇ idf ±¸ÇÏ±â
+    // ëª¨ë“  ë‹¨ì–´ì˜ idf êµ¬í•˜ê¸°
     let idf = natural.get_idf_DB(bow, vocab);
     
-    // ¸ğµç ¹®¼­ÀÇ tfidf ±¸ÇÏ±â
+    // ëª¨ë“  ë¬¸ì„œì˜ tfidf êµ¬í•˜ê¸°
     let tfidf = natural.get_tfidf_DB(bow, idf);
      
-    // 0¹ø ¹®¼­¿Í ³ª¸ÓÁö ¹®¼­ÀÇ À¯»çµµ °Ë»ç
+    // 0ë²ˆ ë¬¸ì„œì™€ ë‚˜ë¨¸ì§€ ë¬¸ì„œì˜ ìœ ì‚¬ë„ ê²€ì‚¬
     let cos_sim = natural.cosine_similarity_DB(tfidf);
     console.log(cos_sim);
     console.log('document number: ', tokenized_document.length);
@@ -501,7 +512,7 @@ router.get('/api/NLPwithFileTest', async (req, res) => {
     let natural = require('../natural.js');
     let document = [];
     
-    // ¹Ì¸® ÅäÅ«È­µÈ ¹®¼­µé °¡Á®¿À±â
+    // ë¯¸ë¦¬ í† í°í™”ëœ ë¬¸ì„œë“¤ ê°€ì ¸ì˜¤ê¸°
     console.time('read file time');
     let path = '/home/ksh/node-project/server/tokenized_DBdata_100k';
     let tokenized_document = natural.load_document_file(path);
@@ -510,10 +521,10 @@ router.get('/api/NLPwithFileTest', async (req, res) => {
     
     let UserQ = {
         bid: 0,
-        title: 'ÆÄÀÌ½ãÀ¸·Î Å©·Ñ¸µÇÏ´Â ¹æ¹ı Áú¹®ÀÌ¿ä',
+        title: 'íŒŒì´ì¬ìœ¼ë¡œ í¬ë¡¤ë§í•˜ëŠ” ë°©ë²• ì§ˆë¬¸ì´ìš”',
     };
     
-    // À¯ÀúÀÇ Áú¹®°ú ÅäÅ«È­µÈ ¹®¼­ ÇÕÄ¡±â
+    // ìœ ì €ì˜ ì§ˆë¬¸ê³¼ í† í°í™”ëœ ë¬¸ì„œ í•©ì¹˜ê¸°
     let tokenized_UserQ = natural.tokenizer_DB(UserQ);
     tokenized_document.unshift(tokenized_UserQ);
 
@@ -522,18 +533,18 @@ router.get('/api/NLPwithFileTest', async (req, res) => {
     for(let i=0;i<10;i++){
       let start = new Date();
       
-      // ¸ğµç ´Ü¾î¿¡ index ¸ÅÇÎ
+      // ëª¨ë“  ë‹¨ì–´ì— index ë§¤í•‘
       let result = natural.build_bag_of_words_DB(tokenized_document);
       let vocab = result[0];
       let bow = result[1];
       
-      // ¸ğµç ´Ü¾îÀÇ idf ±¸ÇÏ±â
+      // ëª¨ë“  ë‹¨ì–´ì˜ idf êµ¬í•˜ê¸°
       let idf = natural.get_idf_DB(bow, vocab);
        
-      // ¸ğµç ¹®¼­ÀÇ tfidf ±¸ÇÏ±â
+      // ëª¨ë“  ë¬¸ì„œì˜ tfidf êµ¬í•˜ê¸°
       let tfidf = natural.get_tfidf_DB(bow, idf);
        
-      // 0¹ø ¹®¼­¿Í ³ª¸ÓÁö ¹®¼­ÀÇ À¯»çµµ °Ë»ç
+      // 0ë²ˆ ë¬¸ì„œì™€ ë‚˜ë¨¸ì§€ ë¬¸ì„œì˜ ìœ ì‚¬ë„ ê²€ì‚¬
       let cos_sim = natural.cosine_similarity_DB(tfidf);
       console.log(cos_sim);
       
@@ -584,7 +595,7 @@ router.get('/api/login', (req, res) => {
     const User_id = req.query.id;
     const User_pw = req.query.pw;
     //console.log(req.body.id,req.body.pw);
-    console.log('·Î±×ÀÎ1');
+    console.log('ë¡œê·¸ì¸1');
     console.log(req.query);
 
     db.query('select count(*) as cnt from Member where User_id=? and User_pw=?', [User_id, User_pw], (err, rows)=>{
@@ -604,17 +615,17 @@ router.post('/api/login2', (req, res) => {
 
     const User_id = req.query.id;
     const User_pw = req.query.pw;
-    console.log('·Î±×ÀÎ2');
+    console.log('ë¡œê·¸ì¸2');
     console.log(req.query);
 
     const sqlLogin = 'select count(*) as result from Member where User_id = ? and User_pw = ?'
     db.query(sqlLogin, [User_id, User_pw], (err, data) => {
         if(!err) {
-        	// °á°ú°ªÀÌ 1º¸´Ù ÀÛ´Ù¸é(µ¿ÀÏÇÑ id °¡ ¾ø´Ù¸é)
+        	// ê²°ê³¼ê°’ì´ 1ë³´ë‹¤ ì‘ë‹¤ë©´(ë™ì¼í•œ id ê°€ ì—†ë‹¤ë©´)
             if(data[0].result < 1) {
-                res.send({ 'msg': 'ÀÔ·ÂÇÏ½Å id °¡ ÀÏÄ¡ÇÏÁö ¾Ê½À´Ï´Ù.'})
+                res.send({ 'msg': 'ì…ë ¥í•˜ì‹  id ê°€ ì¼ì¹˜í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.'})
             } 
-            else { // µ¿ÀÏÇÑ id °¡ ÀÖÀ¸¸é ºñ¹Ğ¹øÈ£ ÀÏÄ¡ È®ÀÎ
+            else { // ë™ì¼í•œ id ê°€ ìˆìœ¼ë©´ ë¹„ë°€ë²ˆí˜¸ ì¼ì¹˜ í™•ì¸
                 const sql2 = `SELECT 
                                 CASE (SELECT COUNT(*) FROM Member WHERE User_id = ? AND User_pw = ?)
                                     WHEN '0' THEN NULL
@@ -624,7 +635,7 @@ router.post('/api/login2', (req, res) => {
                                     WHEN '0' THEN NULL
                                     ELSE (SELECT user_pw FROM Member WHERE User_id = ? AND User_pw = ?)
                                 END AS userPw`;
-                // sql ¶õ¿¡ ÇÊ¿äÇÑ parameter °ªÀ» ¼ø¼­´ë·Î ±âÀç
+                // sql ë€ì— í•„ìš”í•œ parameter ê°’ì„ ìˆœì„œëŒ€ë¡œ ê¸°ì¬
                 const params = [User_id, User_pw, User_id, User_pw, User_id, User_pw, User_id, User_pw]
                 db.query(sql2, params, (err, data) => {
                     if(!err) {
@@ -643,7 +654,7 @@ router.post('/api/login2', (req, res) => {
 })
 
 router.post('/api/login3', (req, res) => {
-    console.log('·Î±×ÀÎ3');
+    console.log('ë¡œê·¸ì¸3');
     console.log(req.body);
     const User_id = req.body?.id;
     const User_pw = req.body?.pw;
@@ -662,7 +673,7 @@ router.post('/api/login3', (req, res) => {
 })
 
 router.get('/api/getSimilarPost', (req, res) => {
-    console.log('Áú¹® À¯»çµµ °Ë»ç');
+    console.log('ì§ˆë¬¸ ìœ ì‚¬ë„ ê²€ì‚¬');
     console.time('node runtime');
     
     const pythonShell = require('python-shell');
@@ -684,25 +695,25 @@ router.get('/api/getSimilarPost', (req, res) => {
 })
 
 router.get('/api/getCsv', (req, res) => {
-    console.log('csv ÆÄÀÏ Å×½ºÆ®');
+    console.log('csv íŒŒì¼ í…ŒìŠ¤íŠ¸');
     
-    var question = 'C++ vector';        // »ç¿ëÀÚÀÇ Áú¹®(ÀÓÀÇ·Î ¸¸µë)
-    question = question + ',' + ',' + '\n';  // csvÇü½Ä¿¡ ¸Â°Ô º¯Çü
+    var question = 'C++ vector';        // ì‚¬ìš©ìì˜ ì§ˆë¬¸(ì„ì˜ë¡œ ë§Œë“¬)
+    question = question + ',' + ',' + '\n';  // csví˜•ì‹ì— ë§ê²Œ ë³€í˜•
     console.log(question);
     
     const fs = require('fs');
     
-    fs.readFile('/home/ksh/node-project/server/OKKY C++ utf8.csv', 'utf8', (err, data) => {  // csv ÆÄÀÏ ÀĞ¾î¿È
+    fs.readFile('/home/ksh/node-project/server/OKKY C++ utf8.csv', 'utf8', (err, data) => {  // csv íŒŒì¼ ì½ì–´ì˜´
         if(err) throw err;
         console.log('csv read');
         var dataArray = data.split(/\r?\n/);
         //console.log(dataArray[1]);
         
-        dataArray.splice(1, 0, question);  // csv ÆÄÀÏ¿¡ »ç¿ëÀÚÀÇ Áú¹® Ãß°¡
+        dataArray.splice(1, 0, question);  // csv íŒŒì¼ì— ì‚¬ìš©ìì˜ ì§ˆë¬¸ ì¶”ê°€
         console.log(dataArray[1]);
         
         var dataStr = '';
-        for (var i in dataArray){  // csv ÆÄÀÏ¿¡ ¸Â°Ô string ÇüÅÂ·Î ¸¸µë
+        for (var i in dataArray){  // csv íŒŒì¼ì— ë§ê²Œ string í˜•íƒœë¡œ ë§Œë“¬
             dataStr = dataStr + dataArray[i] + '\n';
             if(i<2){
               console.log(dataStr);
@@ -712,7 +723,7 @@ router.get('/api/getCsv', (req, res) => {
         
         res.send(dataStr);
         
-        fs.writeFileSync('OKKY C++ utf8 added.csv', dataStr);  // csv ÆÄÀÏ ¾²±â
+        fs.writeFileSync('OKKY C++ utf8 added.csv', dataStr);  // csv íŒŒì¼ ì“°ê¸°
         
     })
     
@@ -734,7 +745,7 @@ router.get('/api/CSVToDBtemp', (req, res) => {
           .on("end", () => {
           
             /*
-            // Áßº¹ Á¦°Å
+            // ì¤‘ë³µ ì œê±°
             for(var i in dataArray){
               const iTitle = dataArray[i]["title"];
               for(var j = 0;j < i;j++){
@@ -747,13 +758,13 @@ router.get('/api/CSVToDBtemp', (req, res) => {
             */
             
             
-            // db·Î ¿Å±â±â
+            // dbë¡œ ì˜®ê¸°ê¸°
             let contentMax = 0;
             let titleMax = 0;
             for(var i in dataArray){
               const title = dataArray[i]["title"];
               const content = dataArray[i]["content"];
-              // max size Ã¼Å©
+              // max size ì²´í¬
               if(contentMax<content.length){
                 contentMax = content.length;
               }
@@ -794,12 +805,12 @@ router.post('/api/expectedAnswer',(req, res) => {
     }
     //console.log(userQ);
       
-    // À¯Àú Áú¹® ÅäÅ«È­
+    // ìœ ì € ì§ˆë¬¸ í† í°í™”
     let tokenized_UserQ = natural.tokenizer_DB(UserQ);
     console.log(tokenized_UserQ);
     
     console.time('read file time');
-    // ¹Ì¸® ÀúÀåµÈ ´Ü¾î »çÀü ºÒ·¯¿À±â
+    // ë¯¸ë¦¬ ì €ì¥ëœ ë‹¨ì–´ ì‚¬ì „ ë¶ˆëŸ¬ì˜¤ê¸°
     let path = '/home/ksh/node-project/server/vocab_DBdata_' + num;
     let vocab_file = natural.load_document_file(path);
     let vocab = new Map();
@@ -809,19 +820,19 @@ router.post('/api/expectedAnswer',(req, res) => {
     }
     //console.log(vocab);
     
-    // ¹Ì¸® ÀúÀåµÈ idf ºÒ·¯¿À±â
+    // ë¯¸ë¦¬ ì €ì¥ëœ idf ë¶ˆëŸ¬ì˜¤ê¸°
     path = '/home/ksh/node-project/server/idf_DBdata_' + num;
     let idf = natural.load_document_file(path);
     //console.log(idf);
     
-    // ¹Ì¸® ÀúÀåµÈ tfidf ºÒ·¯¿À±â
+    // ë¯¸ë¦¬ ì €ì¥ëœ tfidf ë¶ˆëŸ¬ì˜¤ê¸°
     //path = '/home/ksh/node-project/server/tfidf_DBdata_' + num;
     //let tfidf = natural.load_document_file(path);
     let tfidf = server_tfidf;
     //console.log(tfidf);
     console.timeEnd('read file time');
     
-    // À¯Àú Áú¹® ÅäÅ«ÀÌ ´Ü¾î »çÀü¿¡ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
+    // ìœ ì € ì§ˆë¬¸ í† í°ì´ ë‹¨ì–´ ì‚¬ì „ì— ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸
     let token_matched_index = [];
     for(let i in tokenized_UserQ.title){
         let index = vocab.get(tokenized_UserQ.title[i]);
@@ -836,7 +847,7 @@ router.post('/api/expectedAnswer',(req, res) => {
     }
     //console.log(token_matched_index);
     
-    // À¯Àú Áú¹® tf ±¸ÇÏ±â
+    // ìœ ì € ì§ˆë¬¸ tf êµ¬í•˜ê¸°
     let bow_obj_UserQ = {};
     let bow_temp = [];
     for(let i in token_matched_index){
@@ -872,7 +883,7 @@ router.post('/api/expectedAnswer',(req, res) => {
     };
     //console.log(bow_obj_UserQ);
     
-    // À¯Àú Áú¹® tfidf ±¸ÇÏ±â
+    // ìœ ì € ì§ˆë¬¸ tfidf êµ¬í•˜ê¸°
     let tfidf_obj_UserQ = {};
     let tfidf_temp = [];
     for(let i in bow_obj_UserQ.bow){
@@ -892,11 +903,11 @@ router.post('/api/expectedAnswer',(req, res) => {
     };
     //console.log(tfidf_obj_UserQ);
     
-    // À¯Àú Áú¹® tfidf¸¦ ¹Ì¸® ÀúÀåµÈ tfidf¿Í ÇÕÄ§
+    // ìœ ì € ì§ˆë¬¸ tfidfë¥¼ ë¯¸ë¦¬ ì €ì¥ëœ tfidfì™€ í•©ì¹¨
     tfidf.unshift(tfidf_obj_UserQ);
     //console.log(tfidf);
     
-    // À¯Àú Áú¹® tfidf¿Í ¹Ì¸® ÀúÀåµÈ tfidf°ªÀ» ÄÚ»çÀÎ À¯»çµµ °Ë»çÇÔ
+    // ìœ ì € ì§ˆë¬¸ tfidfì™€ ë¯¸ë¦¬ ì €ì¥ëœ tfidfê°’ì„ ì½”ì‚¬ì¸ ìœ ì‚¬ë„ ê²€ì‚¬í•¨
     let cos_sim = natural.cosine_similarity_DB(tfidf);
     console.log(cos_sim);
     
@@ -931,7 +942,7 @@ router.post('/api/expectedAnswer',(req, res) => {
 
 
 router.post('/api/android/login', (req, res) => {
-    console.log('¾Èµå·ÎÀÌµå ·Î±×ÀÎ');
+    console.log('ì•ˆë“œë¡œì´ë“œ ë¡œê·¸ì¸');
     console.log(req.body);
     const User_id = req.body?.id;
     const User_pw = req.body?.pw;
@@ -988,7 +999,7 @@ router.get('/api/android/getEdge',(req,res) => {
 });
 
 router.post('/api/android/addRecentPath', (req, res) => {
-    console.log('¾Èµå·ÎÀÌµå ÃÖ±Ù °æ·Î Ãß°¡');
+    console.log('ì•ˆë“œë¡œì´ë“œ ìµœê·¼ ê²½ë¡œ ì¶”ê°€');
     console.log(req.body);
     const User_seq = req.body?.User_seq;
     const cost = req.body?.cost;
@@ -1008,7 +1019,7 @@ router.post('/api/android/addRecentPath', (req, res) => {
 })
 
 router.post('/api/android/getRecentPath', (req, res) => {
-    console.log('¾Èµå·ÎÀÌµå ÃÖ±Ù °æ·Î Á¶È¸');
+    console.log('ì•ˆë“œë¡œì´ë“œ ìµœê·¼ ê²½ë¡œ ì¡°íšŒ');
     console.log(req.body);
     const User_seq = req.body?.User_seq;
 

@@ -44,7 +44,7 @@ function QuestionsPage(){
                 {posts.map((post) => (
                     <QuestionRow 
                         key={post.bid}
-                        bid={post.bid} 
+                        id={post.bid}
                         title={post.title} 
                         content={post.content}
                     />

@@ -1,26 +1,26 @@
-import './App.css';
 import styles from './Home.module.css'
+import { Reset } from 'styled-reset';
+import styled, {createGlobalStyle} from 'styled-components';
 import React, { useState, useEffect } from 'react'
+import Header from "./Header";
+import QuestionsPage from "./QuestionsPage"
 import axios from 'axios';
 
-function Home(){
-    const [loading, setLoading] = useState(true);
-    const [posts, setPosts] = useState([]);
-    const getPosts = async () =>{
-        const response = await fetch(
-            'http://3.90.201.108:3001/api/home'
-        );
-        const json = await response.json();
-        setPosts(json);
-        setLoading(false);
-        console.log(json);
-    };
-    useEffect(() => {
-        getPosts();
-    }, []);
+const GlobalStyles = createGlobalStyle`
+  body{
+    background: #fff;
+    color:#2d2d2d;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+`
 
+function Home(){
     return(
         <div>
+            <Reset/>
+            <GlobalStyles/>
+            <Header/>
+            <QuestionsPage/>
         </div>
     )
 }

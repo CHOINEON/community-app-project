@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import { Link } from "react-router-dom"
 
 const QuestionStat = styled.div`
     text-align:center;
@@ -55,14 +56,16 @@ const UserLink = styled.a`
     color: #3ca4ff;
 `
 
-function QuestionRow({bid, title, content}){
+function QuestionRow({bid, id, title, content}){
     return(
         <StyledQuestionRow>
             <QuestionStat>0<span>votes</span></QuestionStat>
             <QuestionStat>2<span>answers</span></QuestionStat>
             <QuestionStat>4<span>views</span></QuestionStat>
             <QuestionTitleArea>
-                <QuestionLink>{title}</QuestionLink>
+                <QuestionLink>
+                    <Link to={`/Question/${id}`}>{title}</Link>
+                </QuestionLink>
                 <QuestionSummary>{content}</QuestionSummary>
                 <Tag>javascript</Tag>
                 <WhoAndWhen>
