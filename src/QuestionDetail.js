@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import {useParams} from 'react-router-dom'
+
 function QuestionDetail(){
     const {id} = useParams();
     const getQeustion = async () =>{
@@ -14,7 +15,8 @@ function QuestionDetail(){
             }
         );
         const json = await response.json();
-        console.log(json);
+        const result = json[0];
+        console.log(result);
     };
     useEffect(() =>{
         getQeustion();

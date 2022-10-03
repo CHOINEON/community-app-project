@@ -15,7 +15,7 @@ let server_tfidf = nat.load_document_file('/home/ksh/node-project/server/tfidf_D
 
 router.get('/api/home', (req, res) =>{
     let DBdata = [];
-    db.query('select bid, title, content from board2 Limit 20', (err, rows) =>{
+    db.query('select * from board2 order by bid DESC Limit 20', (err, rows) =>{
         DBdata = rows.map(v => Object.assign({}, v));
         for(var i in DBdata){
           if(DBdata[i].content.length>200){
@@ -29,12 +29,11 @@ router.get('/api/home', (req, res) =>{
 });
 
 router.post('/api/questionDetail', (req, res) => {
-    console.log(req.body);
     const Question_id = req.body?.id;
     console.log(`Qeustion ${Question_id} Detail Request`);
     
     db.query('select bid, title, content from board2 where bid=?', [Question_id], (err, rows)=>{
-        console.log(rows);
+        //console.log(rows);
         res.send(rows);
     })
 })

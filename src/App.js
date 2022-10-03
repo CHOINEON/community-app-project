@@ -1,17 +1,31 @@
 import { BrowserRouter as Router,Routes, Route } from 'react-router-dom';
+import { Reset } from 'styled-reset';
+import styled, {createGlobalStyle} from 'styled-components';
 import Home from './Home';
 import QuestionDetail from './QuestionDetail';
 import Question from './QuestionDetail'
 
+const GlobalStyles = createGlobalStyle`
+  body{
+    background: #fff;
+    color:#2d2d2d;
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+`
 
 function App(){
   return(
-    <Router>
-      <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/Question/:id' element={<QuestionDetail/>}/>
-      </Routes>
-    </Router>
+    <div>
+      <Reset/>
+      <GlobalStyles/>
+      
+      <Router>
+        <Routes>
+          <Route path='/' element={<Home/>}/>
+          <Route path='/Question/:id' element={<QuestionDetail/>}/>
+        </Routes>
+      </Router>
+    </div>
   )
 }
 
