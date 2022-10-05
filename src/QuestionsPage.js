@@ -1,21 +1,13 @@
-import styled from 'styled-components'
+import styled from "styled-components"
 import QuestionRow from './QuestionRow'
 import { useState,useEffect } from 'react'
+import BlueButtonLink from './BlueButtonLink'
+import Header1 from "./Header1"
 
-const StyledHeader = styled.h1`
-    font-size: 1.8rem;
-`
 const HeaderRow = styled.div`
     display: grid;
     grid-template-columns: 1fr min-content;
     padding: 30px 20px;
-`
-const BlueButton = styled.button`
-    background-color: #378ad3;
-    color:#fff;
-    border:0;
-    border-radius:5px;
-    padding: 12px 10px;
 `
 
 function QuestionsPage(){
@@ -37,8 +29,8 @@ function QuestionsPage(){
     return(
         <main>
             <HeaderRow>
-                <StyledHeader>All Questions</StyledHeader>
-                <BlueButton>Ask Question</BlueButton>
+                <Header1 style={{margin:0}}>All Questions</Header1>
+                <BlueButtonLink to={'/ask'}>Ask&nbsp;Questions</BlueButtonLink>
             </HeaderRow>
             <div>
                 {posts.map((post) => (

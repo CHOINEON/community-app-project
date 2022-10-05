@@ -1,14 +1,9 @@
-import styles from './Home.module.css'
-import React, { useState, useEffect } from 'react'
-import Header from "./Header";
 import QuestionsPage from "./QuestionsPage"
-import axios from 'axios';
 
 
 function Home(){
     return(
         <div>
-            <Header/>
             <QuestionsPage/>
         </div>
     )

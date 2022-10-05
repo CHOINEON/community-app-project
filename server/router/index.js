@@ -9,6 +9,9 @@ const simpleTfidf = require('../simple-tf-idf');
 const simpleTfidfDB = require('../simple-tf-idf-db');
 const saveDataFile = require('../save-data-file');
 
+import jwt from 'jsonwebtoken';
+const secret = 'secret123';
+
 let NUM = '10k';
 let server_tfidf = nat.load_document_file('/home/ksh/node-project/server/tfidf_DBdata_' + NUM);
 //console.log(server_tfidf);
@@ -36,6 +39,25 @@ router.post('/api/questionDetail', (req, res) => {
         //console.log(rows);
         res.send(rows);
     })
+})
+
+router.post('/login', (req, res) => {
+    const {email, password} = req.body;
+    console.log(`email : ${email} \n password : ${password}`);
+    const isLoginOk = email === 'test@example.com' && password === '1234';
+    
+    jwt.sign(email, secret, (err, token) => {
+        if(err){
+            res.status(403).send(err);
+        }
+        else{
+            res.json({token});
+        }
+    })
+
+    if(!isLoginOk){
+        res.send(403).send('login not ok')
+    }
 })
 
 router.get('/api/csvToDB', (req, res) =>{

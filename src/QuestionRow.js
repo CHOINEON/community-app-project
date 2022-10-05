@@ -22,7 +22,7 @@ const QuestionSummary =styled.div`
     font-size:.8rem;
     line-height: 17px;
 `
-const QuestionLink = styled.a`
+const QuestionLink = styled(Link)`
     text-decoration:none;
     color:#3ca4ff;
     font-size:1.1rem;
@@ -63,8 +63,8 @@ function QuestionRow({bid, id, title, content}){
             <QuestionStat>2<span>answers</span></QuestionStat>
             <QuestionStat>4<span>views</span></QuestionStat>
             <QuestionTitleArea>
-                <QuestionLink>
-                    <Link to={`/Question/${id}`}>{title}</Link>
+                <QuestionLink to={`/question/${id}`}>
+                    {title}
                 </QuestionLink>
                 <QuestionSummary>{content}</QuestionSummary>
                 <Tag>javascript</Tag>

@@ -1,29 +1,30 @@
+import { useState } from 'react';
 import { BrowserRouter as Router,Routes, Route } from 'react-router-dom';
 import { Reset } from 'styled-reset';
-import styled, {createGlobalStyle} from 'styled-components';
 import Home from './Home';
 import QuestionDetail from './QuestionDetail';
-import Question from './QuestionDetail'
-
-const GlobalStyles = createGlobalStyle`
-  body{
-    background: #fff;
-    color:#2d2d2d;
-    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  }
-`
+import AskPage from './AskPage';
+import Header from './Header';
+import GlobalStyles from './GlobalStyles';
+import UserContext from './UserContext';
+import LoginPage from './LoginPage';
 
 function App(){
+  const [user, setUser] = useState(null);
   return(
     <div>
       <Reset/>
       <GlobalStyles/>
-      
       <Router>
-        <Routes>
-          <Route path='/' element={<Home/>}/>
-          <Route path='/Question/:id' element={<QuestionDetail/>}/>
-        </Routes>
+        <UserContext.Provider value={{user}}>
+          <Header/>
+          <Routes>
+            <Route path='/' element={<Home/>}/>
+            <Route path='/login' element={<LoginPage/>}/>
+            <Route path='/ask' element={<AskPage/>}/>
+            <Route path='/question/:id' element={<QuestionDetail/>}/>
+          </Routes>          
+        </UserContext.Provider>
       </Router>
     </div>
   )

@@ -1,6 +1,9 @@
-import styled from 'styled-components'
+import styled from "styled-components"
+import { useContext } from "react";
+import { Link } from "react-router-dom"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
+import UserContext from "./UserContext";
 
 const StyledHeader = styled.header`
     background-color: #fafafa;
@@ -10,7 +13,7 @@ const StyledHeader = styled.header`
     grid-column-gap: 20px;
 `;
 
-const LogoLink = styled.a`
+const LogoLink = styled(Link)`
     color: #2d2d2d;
     text-decoration: none;
     display: inline-block;
@@ -47,23 +50,29 @@ const SearchInput = styled.input`
     margin-top: 9px;
 `
 
-const ProfileLink = styled.a`
+const ProfileLink = styled(Link)`
     color:#2d2d2d;
     text-decoration:none;
     line-height:50px;
 `
 
 function Header() {
+    const {user} = useContext(UserContext)
     return(
         <StyledHeader>
-            <LogoLink herf="" className="logo">
+            <LogoLink to={'/'} className="logo">
                 <FontAwesomeIcon icon={faBars} size="2x" />
                 <span>Test<b>Search</b></span>
             </LogoLink>
             <form action="" className="search">
                 <SearchInput type="text" placeholder="Search..."/>
             </form>
-            <ProfileLink herf="" className="profile">user</ProfileLink>
+            {user && (
+                <ProfileLink to={'/profile'} className="profile">user</ProfileLink>
+            )}
+            {!user && (
+                <ProfileLink to={'/login'} className="profile">Log in</ProfileLink>
+            )}
         </StyledHeader>
     );
 };
