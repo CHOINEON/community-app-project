@@ -9,7 +9,7 @@ const simpleTfidf = require('../simple-tf-idf');
 const simpleTfidfDB = require('../simple-tf-idf-db');
 const saveDataFile = require('../save-data-file');
 
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 const secret = 'secret123';
 
 let NUM = '10k';
@@ -46,7 +46,7 @@ router.post('/login', (req, res) => {
     console.log(`email : ${email} \n password : ${password}`);
     const isLoginOk = email === 'test@example.com' && password === '1234';
     
-    jwt.sign(email, secret, (err, token) => {
+    isLoginOK && jwt.sign(email, secret, (err, token) => {
         if(err){
             res.status(403).send(err);
         }
