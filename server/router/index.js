@@ -43,12 +43,12 @@ router.post('/api/questionDetail', (req, res) => {
 
 router.post('/login', (req, res) => {
     const {email, password} = req.body;
-    console.log(`email : ${email} \n password : ${password}`);
+    console.log(`email : ${email} \npassword : ${password}`);
     const isLoginOk = email === 'test@example.com' && password === '1234';
     
-    isLoginOK && jwt.sign(email, secret, (err, token) => {
+    isLoginOk && jwt.sign(email, secret, (err, token) => {
         if(err){
-            res.status(403).send(err);
+            res.status(403).send();
         }
         else{
             res.json({token});
@@ -56,7 +56,7 @@ router.post('/login', (req, res) => {
     })
 
     if(!isLoginOk){
-        res.send(403).send('login not ok')
+        res.send(403).send()
     }
 })
 

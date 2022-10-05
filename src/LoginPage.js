@@ -26,7 +26,7 @@ function LoginPage(){
                   }),
             }
         );
-        const json = await response.json();
+        const json = await response;
         console.log(json);
     };
 
@@ -43,7 +43,7 @@ function LoginPage(){
                 type='password' 
                 value={password}
                 onChange={e => setPassword(e.target.value)} />
-            <BlueButton onClick={login()}>Login</BlueButton>
+            <BlueButton onClick={() => login()}>Login</BlueButton>
         </Container>
     )
 }
