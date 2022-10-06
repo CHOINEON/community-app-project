@@ -51,12 +51,12 @@ router.post('/login', (req, res) => {
             res.status(403).send();
         }
         else{
-            res.json({token});
+            res.cookie('token', token, {httpOnly: false}).send();
         }
     })
 
     if(!isLoginOk){
-        res.send(403).send()
+        res.json(req.cookies);
     }
 })
 

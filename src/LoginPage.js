@@ -3,6 +3,7 @@ import Header1 from "./Header1"
 import styled from "styled-components"
 import Input from "./Input";
 import BlueButton from "./BlutButton";
+import axios from "axios";
 
 const Container = styled.div`
 padding: 30px 20px;
@@ -14,7 +15,14 @@ function LoginPage(){
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const login = async () =>{
+    function login(){
+        axios.post('http://3.90.201.108:3001/login',{
+            email: email,
+            password: password,
+        }, {withCredentials: true})
+    }
+
+/*     const login = async () =>{
         const response = await fetch('http://3.90.201.108:3001/login',{
                 method: 'Post',
                 headers: {
@@ -28,7 +36,7 @@ function LoginPage(){
         );
         const json = await response;
         console.log(json);
-    };
+    }; */
 
     return(
         <Container>
