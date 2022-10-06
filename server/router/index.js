@@ -51,13 +51,25 @@ router.post('/login', (req, res) => {
             res.status(403).send();
         }
         else{
-            res.cookie('token', token, {httpOnly: false}).send();
+            res.cookie('token', token).send();
         }
     })
 
     if(!isLoginOk){
-        res.json(req.cookies);
+        res.status(403).send();
     }
+})
+
+router.get('/profile', (req, res) => {
+    const token = req.cookies.token;
+    jwt.verify(token, secret, (err, data) => {
+        if(err){
+            res.status(403).send();
+        }
+        else{
+            res.json(data).send();
+        }
+    })
 })
 
 router.get('/api/csvToDB', (req, res) =>{
