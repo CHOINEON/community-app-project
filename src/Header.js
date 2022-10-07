@@ -52,12 +52,13 @@ const SearchInput = styled.input`
 
 const ProfileLink = styled(Link)`
     color:#2d2d2d;
+    padding: 0 10px;
     text-decoration:none;
     line-height:50px;
 `
 
 function Header() {
-    const {user} = useContext(UserContext)
+    const {user} = useContext(UserContext);
     return(
         <StyledHeader>
             <LogoLink to={'/'} className="logo">
@@ -68,10 +69,13 @@ function Header() {
                 <SearchInput type="text" placeholder="Search..."/>
             </form>
             {user && (
-                <ProfileLink to={'/profile'} className="profile">user</ProfileLink>
+                <ProfileLink to={'/profile'} className="profile">{user.email}</ProfileLink>
             )}
             {!user && (
-                <ProfileLink to={'/login'} className="profile">Log in</ProfileLink>
+                <div>
+                    <ProfileLink to={'/login'} className="profile">Log in</ProfileLink>
+                    <ProfileLink to={'/register'} className="profile">Resigster</ProfileLink>
+                </div>
             )}
         </StyledHeader>
     );

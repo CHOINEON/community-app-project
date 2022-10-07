@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router,Routes, Route } from 'react-router-dom';
 import { Reset } from 'styled-reset';
 import Home from './Home';
@@ -8,19 +8,42 @@ import Header from './Header';
 import GlobalStyles from './GlobalStyles';
 import UserContext from './UserContext';
 import LoginPage from './LoginPage';
+import RegisterPage from './RegisterPage';
+import ProfilePage from './ProfilePage';
+import axios from 'axios';
 
 function App(){
   const [user, setUser] = useState(null);
+  function checkAuth(){
+    return new Promise(((resolve, reject) => {
+      axios.get('http://3.90.201.108:3001/profile', {withCredentials: true})
+       .then((response) => {
+         setUser({email:response.data});
+         resolve(response.data);
+       })
+       .catch(response => {
+         setUser(null);
+         reject(null);
+      });
+    }));
+  }
+  
+  useEffect(() => {
+    checkAuth();
+  }, []);
+  
   return(
     <div>
       <Reset/>
       <GlobalStyles/>
       <Router>
-        <UserContext.Provider value={{user}}>
+        <UserContext.Provider value={{user, checkAuth}}>
           <Header/>
           <Routes>
             <Route path='/' element={<Home/>}/>
             <Route path='/login' element={<LoginPage/>}/>
+            <Route path='/register' element={<RegisterPage/>}/>
+            <Route path='/profile' element={<ProfilePage/>}/>
             <Route path='/ask' element={<AskPage/>}/>
             <Route path='/question/:id' element={<QuestionDetail/>}/>
           </Routes>          
