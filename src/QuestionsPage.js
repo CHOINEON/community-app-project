@@ -3,6 +3,7 @@ import QuestionRow from './QuestionRow'
 import { useState,useEffect } from 'react'
 import BlueButtonLink from './BlueButtonLink'
 import Header1 from "./Header1"
+import axios from "axios"
 
 const HeaderRow = styled.div`
     display: grid;
@@ -11,20 +12,14 @@ const HeaderRow = styled.div`
 `
 
 function QuestionsPage(){
-    const [loading, setLoading] = useState(true);
-    const [posts, setPosts] = useState([]);
-    const getPosts = async () =>{
-        const response = await fetch(
-            'http://3.90.201.108:3001/api/home'
-        );
-        const json = await response.json();
-        setPosts(json);
-        setLoading(false);
-        console.log(json);
-    };
-    useEffect(() => {
-        getPosts();
-    }, []);
+    const [questions, setQuestions] = useState([]);
+    function fetchQuestions(){
+        axios.get('http://3.90.201.108:3001/questions', {withCredentials: true})
+            .then(response => {
+                setQuestions(response.data);
+            });
+    }
+    useEffect(() => fetchQuestions(), []);
     
     return(
         <main>
@@ -33,12 +28,12 @@ function QuestionsPage(){
                 <BlueButtonLink to={'/ask'}>Ask&nbsp;Questions</BlueButtonLink>
             </HeaderRow>
             <div>
-                {posts.map((post) => (
+                {questions && questions.length > 0 && questions.map((question) => (
                     <QuestionRow 
-                        key={post.bid}
-                        id={post.bid}
-                        title={post.title} 
-                        content={post.content}
+                        key={question.bid}
+                        id={question.bid}
+                        title={question.title} 
+                        content={question.content}
                     />
                 ))}
             </div>

@@ -45,7 +45,7 @@ function App(){
             <Route path='/register' element={<RegisterPage/>}/>
             <Route path='/profile' element={<ProfilePage/>}/>
             <Route path='/ask' element={<AskPage/>}/>
-            <Route path='/question/:id' element={<QuestionDetail/>}/>
+            <Route path='/questions/:id' element={<QuestionDetail/>}/>
           </Routes>          
         </UserContext.Provider>
       </Router>

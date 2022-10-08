@@ -6,6 +6,8 @@ const router = require('./router/index.js');
 const cors = require('cors');
 const request = require('request');
 const cookieParser = require('cookie-parser');
+const QuestionRoutes = require('./router/QuestionRoutes.js');
+const UserRoutes = require('./router/UserRoutes.js');
 
 
 const app = express();
@@ -16,6 +18,8 @@ app.use(cors({
     credentials: true,
 }));
 
+app.use('/', UserRoutes);
+app.use('/', QuestionRoutes);
 app.use('/', router);
 
 

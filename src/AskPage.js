@@ -6,6 +6,8 @@ import remarkGfm from "remark-gfm";
 import { useState } from "react";
 import Header1 from "./Header1"
 import Input from "./Input";
+import axios from "axios";
+import {Navigate} from 'react-router-dom';
 
 const Container = styled.div`
     padding: 30px 20px;
@@ -34,27 +36,46 @@ function AskPage(){
 
     const [questionTitle, setQuestionTitle] = useState('');
     const [questionBody, setQuestionBody] = useState('');
+    const [redirect, setRedirect] = useState(false);
+
+    
+    function sendQuestion(e) {
+        e.preventDefault();
+        axios.post('http://3.90.201.108:3001/questions', {
+            title: questionTitle,
+            content: questionBody,
+        }, {withCredentials: true})
+            .then(response => {
+                console.log(response);
+                setRedirect('/questions/' + response.data.insertId);
+            });
+    }
 
     return(
         <Container>
+            {redirect && (
+                <Navigate to={redirect} />
+            )}
             <Header1 style={{marginBottom:'20px'}}>Ask a Question</Header1>
+            <form onSubmit={e => sendQuestion(e)}>
+                <Input
+                    type="text"
+                    value={questionTitle}
+                    onChange={e => setQuestionTitle(e.target.value)}
+                    placeholder="Title of your question"/>
 
-            <Input
-                type="text"
-                value={questionTitle}
-                onChange={e => setQuestionTitle(e.target.value)}
-                placeholder="Title of your question"/>
+                <QuestionBodyTextarea
+                    value={questionBody}
+                    onChange={e => setQuestionBody(e.target.value)}
+                    placeholder="More info about your question. You can use markdown here."/>
 
-            <QuestionBodyTextarea
-                onChange={e => setQuestionBody(e.target.value)}
-                placeholder="More info about your question. You can use markdown here.">{questionBody}</QuestionBodyTextarea>
-
-            <PreviewArea>
-                <ReactMarkdown plugins={[remarkGfm]} children={questionBody}/>
-            </PreviewArea>
-            
-            <Bluebutton>Post Question</Bluebutton>
-            </Container>
+                <PreviewArea>
+                    <ReactMarkdown plugins={[remarkGfm]} children={questionBody}/>
+                </PreviewArea>
+                
+                <Bluebutton type={'submit'}>Post Question</Bluebutton>                
+            </form>
+        </Container>
     )
 }
 

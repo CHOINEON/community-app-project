@@ -1,5 +1,6 @@
 import styled from "styled-components"
 import { Link } from "react-router-dom"
+import PropTypes from 'prop-types'
 
 const QuestionStat = styled.div`
     text-align:center;
@@ -63,7 +64,7 @@ function QuestionRow({bid, id, title, content}){
             <QuestionStat>2<span>answers</span></QuestionStat>
             <QuestionStat>4<span>views</span></QuestionStat>
             <QuestionTitleArea>
-                <QuestionLink to={`/question/${id}`}>
+                <QuestionLink to={`/questions/${id}`}>
                     {title}
                 </QuestionLink>
                 <QuestionSummary>{content}</QuestionSummary>
@@ -74,6 +75,12 @@ function QuestionRow({bid, id, title, content}){
             </QuestionTitleArea>
         </StyledQuestionRow>
     )
+}
+
+QuestionRow.propTypes = {
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    content: PropTypes.string.isRequired,
 }
 
 export default QuestionRow;
