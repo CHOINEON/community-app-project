@@ -8,6 +8,7 @@ import Header1 from "./Header1"
 import Input from "./Input";
 import axios from "axios";
 import {Navigate} from 'react-router-dom';
+import { socket } from './socket';
 
 const Container = styled.div`
     padding: 30px 20px;
@@ -48,6 +49,9 @@ function AskPage(){
             .then(response => {
                 console.log(response);
                 setRedirect('/questions/' + response.data.insertId);
+
+                // make chatting room
+                socket.emit('make room', response.data.insertId);
             });
     }
 

@@ -85,4 +85,17 @@ UserRoutes.get('/profile', (req, res) => {
     })
 })
 
+UserRoutes.post('/getUser', (req, res) => {
+    const token = req.cookies.token;
+    const qry1 = 'select User_seq from Member where token=?';
+    db.query(qry1, [token], (err, rows) => {
+        if(err) res.sendStatus(422);
+        else{
+            let user_seq = rows[0];
+            console.log(user_seq);
+            res.send(user_seq);
+        }
+    })
+})
+
 module.exports = UserRoutes;

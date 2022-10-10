@@ -16,9 +16,18 @@ QuestionRoutes.post('/questions', (req, res) =>{
                         if(err) res.status(422).send('something went wrong. Sorry');
                         else{
                             //console.log(rows);
-                            res.json(rows);
+                            res.json(rows);                
+                            // Make chatting room
+                            const qry3 = 'insert into chatRoom (question_id, user_id, valid) value (?,?,?)';
+                            db.query(qry3, [rows.insertId, user_seq, 1], (err, rows) => {
+                                if(err) res.status(422).send('something went wrong. Sorry');
+                                else{
+                                    console.log('chatting room ' + rows.insertId + ' created');
+                                }
+                            })
                         }
                 });
+
             }
             else{
                 res.sendStatus(403);
@@ -30,10 +39,10 @@ QuestionRoutes.post('/questions', (req, res) =>{
 });
 
 QuestionRoutes.get('/questions/:id', (req, res) => {
-    const Question_id = req.params.id;
-    console.log(`Qeustion ${Question_id} Detail Request`);
+    const question_id = req.params.id;
+    console.log(`Qeustion ${question_id} Detail Request`);
     
-    db.query('select * from board2 where bid=?', [Question_id], (err, rows)=>{
+    db.query('select * from board2 where bid=?', [question_id], (err, rows)=>{
         if(err) res.sendStatus(422);
         else{
             const question = rows[0];

@@ -7,86 +7,133 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import UserContext from './UserContext';
 import { socket } from './socket';
+import ChatBox from './ChatBox';
 
 
 const Container = styled.div`
     padding: 30px 20px;
 `;
 
+const ChatContainer = styled.div`
+    padding: 30px;
+    border: 1px solid #777;
+`
+
+const ChatRoom = styled.div`
+    height: 400px;
+    overflow: auto;
+    border: 2px solid rgba(0,0,0,0.3);
+`
+
 function QuestionDetail(){
-    const {id} = useParams();
+    const {id: question_id} = useParams();
     const [question, setQuestion] = useState(false);
-
-    function fetchQeustion() {
-        axios.get('http://3.90.201.108:3001/questions/' + id)
-            .then(response => {
-                //console.log(response);
-                setQuestion(response.data);
-            });
-    };
-    useEffect(() =>{
-        fetchQeustion();
-        console.log('fetchQeustion');
-    },[])
-
-    // Chat
     const {user, checkAuth} = useContext(UserContext);
-    const nickname = user.email;
+    //chat
+    const [login, setLogin] = useState(false);
+    const [nickname, setNickname] = useState(user.email);
+    const [userSeq, setUserSeq] = useState(null);
+    const [chatRoomValid, setChatRoomValid] = useState(false);
+    const [chatRoomId, setChatRoomId] = useState(null);
     const [chats, setchats] = useState([]);
     const [isConnected, setIsConnected] = useState(socket.connected);
     const [Msg, setMessage] = useState('');
+    const [joined, setJoined] = useState(false);
 
-    const addChatMessage = (data) => {
-        let message = '';
-        if (data.numUsers === 1) {
-          message += `there's 1 participant`;
-        } else {
-          message += `there are ${data.numUsers} participants`;
-        }
-        setchats(chats.concat(message));
+    function fetchQeustion() {
+        axios.get('http://3.90.201.108:3001/questions/' + question_id)
+            .then(response => {
+                //console.log(response);
+                setQuestion(response.data);
+                console.log('fetch qeustion');
+            });
+    };
+    function fetchChatRoom(){
+        axios.get('http://3.90.201.108:3001/chatRooms/' + question_id)
+            .then(response => {
+                //console.log(response);
+                let chatRoom = response.data.chatRoom;
+                let chattings = response.data.chattings;
+                console.log(chatRoom);
+                console.log(chattings);
+                setChatRoomValid(chatRoom.valid);
+                setChatRoomId(chatRoom.id);
+                setchats(chattings);
+                console.log('fetch chatRoom');
+            });
+    };
+    function fetchUserInfo(){
+        axios.post('http://3.90.201.108:3001/getUser', {}, {withCredentials: true})
+            .then(response => {
+                console.log(response);
+                setUserSeq(response.data.User_seq);
+                console.log('fetch UserInfo');
+            });
     }
-    
-    function chat(){
-        socket.emit('add user', nickname);
-        
-        socket.on('login', (data) => {
-            setIsConnected(true);    
-            addChatMessage(data);
-        });
-        socket.on('user joined', (data) =>{
-            setchats(chats.concat(`${data.username} joined`));
-        })
-        socket.on('user left', (data) => {
-            setchats(chats.concat(`${data.username} left`));
-        });
-        socket.on('disconnect', () => {
-            setIsConnected(false);
-        });
-        socket.on('new message', (data) => {
-            setchats(chats.concat(`${data.username} : ${data.message}`));
-            console.log('in useEffect new message');
-        });
-        return () => {
-            socket.off('login');
-            socket.off('disconnect');
-            socket.off('new message');
-        };
-    }
-    useEffect(() => {
-        chat();
-        console.log('chat');
-    });
 
     const sendMessage = () => {
-        console.log(Msg);
-        setchats(chats.concat(`${nickname} : ${Msg}`));
-        socket.emit('new message', Msg);
-        setMessage('');
+        axios.post('http://3.90.201.108:3001/chatting', {
+            question_id: question_id,
+            message: Msg,
+        }, {withCredentials:true})
+            .then(response =>{
+                //console.log(response);
+                console.log(response.data);
+                let data = response.data;
+                setchats([...chats, data]);
+                console.log(chats);
+                socket.emit('new message', data);
+                setMessage('');
+            })
     }
     
     const onChange = (e) =>{
         setMessage(e.target.value);
     }
+    
+    async function chat(){
+        console.log(nickname);
+        let data = [question_id, nickname];
+        
+        //if(!joined){
+            socket.emit('join room', data);
+        //    setJoined(true);
+        //}
+        
+        socket.on('new message', (data) => {
+            console.log(data);
+            setchats([...chats, data]);
+            console.log('in useEffect new message');
+        });
+
+        return () => {
+            console.log('off return');
+            socket.off('new message');
+        };
+    }
+
+    useEffect(() =>{
+        fetchQeustion();
+        fetchChatRoom();
+        checkAuth()
+            .then((res) => {
+                setLogin(true);
+                fetchUserInfo();
+                //console.log(res);
+            })
+            .catch((res) => {
+                setLogin(false);
+                //console.log(res);
+            });
+    },[]);
+    useEffect(() => {
+        if(chatRoomValid){
+            chat();
+            console.log('chat');
+        }
+    });
+
+
 
     return(
         <>
@@ -96,25 +143,33 @@ function QuestionDetail(){
                         <Header1>{question && question.title}</Header1>
                         <ReactMarkdown plugins={[remarkGfm]} children={question.content}/>
 
-                        <p>Connected: { '' + isConnected }</p>
-                        <p>socket ID: {nickname+`(${socket.id})` }</p>
-                        <div type="scrollBlind">
-                            <ul type ="message">
-                                {chats.map((val, index) => {
-                                return (<li key={index}>{val}</li>);
-                                })}
-                            </ul>
-                        </div>
-                        <div>
-                            <input 
-                                onChange={onChange} value={Msg} type="inputMessage" 
-                                placeholder="Type here..." 
-                                onKeyPress={(e)=>{
-                                if (e.key === 'Enter')
-                                    sendMessage();
-                                }}/>
-                            <button onClick={sendMessage} >Send</button>
-                        </div>
+                        <ChatContainer>
+                            <p>Connected: { '' + isConnected }</p>
+                            <p>socket ID: {nickname+`(${socket.id})` }</p>
+
+                            <ChatRoom>
+                                {chats.map(item => (
+                                    <ChatBox 
+                                        key={item.id}
+                                        user_id={item.user_id}
+                                        message={item.content}
+                                        date={item.date}
+                                        isMyMsg={item.user_id === user.email}
+                                    />
+                                ))}
+                            </ChatRoom>
+                            <div>
+                                <input 
+                                    onChange={onChange} value={Msg} type="inputMessage" 
+                                    placeholder="Type here..." 
+                                    onKeyPress={(e)=>{
+                                    if (e.key === 'Enter')
+                                        sendMessage();
+                                    }}/>
+                                <button onClick={() => sendMessage()} >Send</button>
+                            </div>
+                        </ChatContainer>
+
                     </>
                 )}
             </Container>

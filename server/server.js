@@ -8,6 +8,7 @@ const request = require('request');
 const cookieParser = require('cookie-parser');
 const QuestionRoutes = require('./router/QuestionRoutes.js');
 const UserRoutes = require('./router/UserRoutes.js');
+const ChatRoutes = require('./router/ChatRoutes.js');
 
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(cors({
 
 app.use('/', UserRoutes);
 app.use('/', QuestionRoutes);
+app.use('/', ChatRoutes);
 app.use('/', router);
 
 

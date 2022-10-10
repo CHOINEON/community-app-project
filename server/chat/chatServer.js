@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
-const io = require('socket.io')(server, {cors : {origin : "*"}});
+const io = require('socket.io')(server, { cors: { origin: "*" } });
 const path = require('path');
 const port = process.env.PORT || 5000;
 
@@ -10,69 +10,63 @@ io.listen(port, () => {
 });
 
 // Routing
-app.use(express.static(path.join(__dirname, 'public')));
+//app.use(express.static(path.join(__dirname, 'public')));
 
 // Chatroom
-let rooms = ["room1", "room2", "room3"];
+let rooms = [];
 let numUsers = 0;
 
 io.on('connection', (socket) => {
   let addedUser = false;
 
+  socket.on('make room', (data) => {
+    let room = {
+      question_id: String(data),
+      numUsers: 0,
+    }
+    rooms.push(room);
+    console.log('chat room ' + data + ' added');
+    console.log(rooms);
+  })
+
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
-    console.log(`${socket.username} : ${data}`);
+    console.log(data);
+    let question_id = String(data.question_id);
+    let nickname = data.user_id;
+    let message = data.content;
+
+    let room = rooms.find(v => v.question_id === question_id);
+    let room_num = room.question_id;
+    console.log(room);
+
+    console.log(`${socket.username} : ${message}`);
+    //io.to(room_num).emit('new message', data);
     // we tell the client to execute 'new message'
-    socket.broadcast.emit('new message', {
-      username: socket.username,
-      message: data
-    });
+
+    socket.broadcast.emit('new message', data);
   });
 
-  // when the client emits 'add user', this listens and executes
-  socket.on('add user', (username) => {
-    if (addedUser) return;
+  // when the client emits 'join room', this listens and executes
+  socket.on('join room', (data) => {
+    if(addedUser) return;
 
-    // we store the username in the socket session for this client
-    socket.username = username;
-    ++numUsers;
-    console.log("connected : "+socket.id+" num : "+numUsers);
+    console.log(data);
+    let question_id = (data[0]);
+    let nickname = data[1];
+    socket.username = nickname;
+
+    let room = rooms.find(v => v.question_id === question_id);
+    let room_num = room.question_id;
+    room.numUsers++;
+    console.log('connected : ' + socket.id + ' num : ' + room.numUsers);
     addedUser = true;
-    socket.emit('login', {
-      numUsers: numUsers
-    });
-    // echo globally (all clients) that a person has connected
-    socket.broadcast.emit('user joined', {
-      username: socket.username,
-      numUsers: numUsers
-    });
-  });
 
-  // when the client emits 'typing', we broadcast it to others
-  socket.on('typing', () => {
-    socket.broadcast.emit('typing', {
-      username: socket.username
-    });
-  });
+    socket.join(room_num);
 
-  // when the client emits 'stop typing', we broadcast it to others
-  socket.on('stop typing', () => {
-    socket.broadcast.emit('stop typing', {
-      username: socket.username
-    });
-  });
-
-  // when the user disconnects.. perform this
-  socket.on('disconnect', () => {
-    
-    if (addedUser) {
-      --numUsers;
-      console.log("disconnected : "+socket.id+" num : "+numUsers);
-      // echo globally that this client has left
-      socket.broadcast.emit('user left', {
-        username: socket.username,
-        numUsers: numUsers
-      });
-    }
+    // socket.join('room_num', () => {
+    //   console.log(nickname + ' join room ' + room_num);
+    //   io.to('room_num').emit('join room', data);
+    // })
   });
 });
