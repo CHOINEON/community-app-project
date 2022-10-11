@@ -40,11 +40,11 @@ io.on('connection', (socket) => {
     let room_num = room.question_id;
     console.log(room);
 
-    console.log(`${socket.username} : ${message}`);
-    //io.to(room_num).emit('new message', data);
+    console.log(`${room_num} , ${socket.username} : ${message}`);
+    io.to(room_num).emit('new message', data);
     // we tell the client to execute 'new message'
 
-    socket.broadcast.emit('new message', data);
+    //socket.broadcast.emit('new message', data);
   });
 
   // when the client emits 'join room', this listens and executes

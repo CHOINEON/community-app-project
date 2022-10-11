@@ -80,7 +80,8 @@ function QuestionDetail(){
                 //console.log(response);
                 console.log(response.data);
                 let data = response.data;
-                setchats([...chats, data]);
+                let newChats = [...chats, data];
+                //setchats(newChats);
                 console.log(chats);
                 socket.emit('new message', data);
                 setMessage('');
@@ -91,7 +92,7 @@ function QuestionDetail(){
         setMessage(e.target.value);
     }
     
-    async function chat(){
+    // async function chat(){
         console.log(nickname);
         let data = [question_id, nickname];
         
@@ -102,15 +103,17 @@ function QuestionDetail(){
         
         socket.on('new message', (data) => {
             console.log(data);
-            setchats([...chats, data]);
+            let newChats = [...chats, data];
+            setchats(newChats);
+            console.log(chats);
             console.log('in useEffect new message');
         });
-
-        return () => {
-            console.log('off return');
-            socket.off('new message');
-        };
-    }
+        
+    //     return () => {
+    //         console.log('off return');
+    //         socket.off('new message');
+    //     };
+    // }
 
     useEffect(() =>{
         fetchQeustion();
@@ -126,12 +129,12 @@ function QuestionDetail(){
                 //console.log(res);
             });
     },[]);
-    useEffect(() => {
-        if(chatRoomValid){
-            chat();
-            console.log('chat');
-        }
-    });
+    // useEffect(() => {
+    //     if(chatRoomValid){
+    //         chat();
+    //         console.log('chat');
+    //     }
+    // }, [chats]);
 
 
 
