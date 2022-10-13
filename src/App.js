@@ -13,6 +13,7 @@ import ProfilePage from './ProfilePage';
 import axios from 'axios';
 
 function App(){
+  const [userSeq, setUserSeq] = useState(null);
   const [user, setUser] = useState(null);
   function checkAuth(){
     return new Promise(((resolve, reject) => {
