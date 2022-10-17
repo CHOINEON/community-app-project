@@ -2,7 +2,7 @@ const simpleTfidfDB = require('./simple-tf-idf-db');
 const db = require('./dbconnection');
 console.log('HI');
 
-let data_num = '10';
+let data_num = '50k';
 let server_tfidf = simpleTfidfDB.load_document_file('./data/' + data_num +'_tfidf_DBdata');
 console.log('load ' + data_num +'_tfidf_DBdata file to memory');
 
