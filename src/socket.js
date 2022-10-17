@@ -1,6 +1,7 @@
 import React from 'react';
 import io from "socket.io-client";
-// import { SOCKET_URL } from "config";
+import config from './config';
 
-export const socket = io('3.90.201.108:3002');
+let socket_url = config.development.url + ':' + config.development.chatserver.port
+export const socket = io(socket_url);
 export const SocketContext = React.createContext();

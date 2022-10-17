@@ -60,7 +60,7 @@ ChatRoutes.post('/chatting', (req, res) => {
                     db.query('select * from chat where id=?',[rows.insertId], (err, rows) => {
                         if(err) res.sendStatus(422);
                         else{
-                            console.log(rows[0]);
+                            //console.log(rows[0]);
                             res.send(rows[0]);
                         }
                     })

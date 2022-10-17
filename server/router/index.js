@@ -7,7 +7,7 @@ const db = require('../dbconnection');
 //const simpleTfidfTest = require('../simple-tf-idf-test');
 //const simpleTfidf = require('../simple-tf-idf');
 //const simpleTfidfDB = require('../simple-tf-idf-db');
-const saveDataFile = require('../save-data-file');
+const saveDataFile = require('../nlp/save-data-file');
 
 //let NUM = '10k';
 //let server_tfidf = nat.load_document_file('/home/ksh/node-project/server/tfidf_DBdata_' + NUM);

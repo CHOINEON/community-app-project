@@ -3,11 +3,13 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, { cors: { origin: "*" } });
 const path = require('path');
-const port = process.env.PORT || 3002;
+const config = require('../../data/config.js').development;
+const port = config.chatserver.port;
 
 io.listen(port, () => {
   console.log('Chat Server listening at port %d', port);
 });
+console.log('Chat Server listening at port %d', port);
 
 // Routing
 //app.use(express.static(path.join(__dirname, 'public')));

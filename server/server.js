@@ -30,4 +30,5 @@ const port = config.server.port;
     console.log(`Listening on port ${port}..`);
 })*/
 http.createServer(app).listen(port);
+console.log('Server listening at port %d', port);
 //https.createServer(app).listen(port);
