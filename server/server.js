@@ -9,13 +9,13 @@ const cookieParser = require('cookie-parser');
 const QuestionRoutes = require('./router/QuestionRoutes.js');
 const UserRoutes = require('./router/UserRoutes.js');
 const ChatRoutes = require('./router/ChatRoutes.js');
-
+const config = require('../data/config.js').development;
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: 'http://3.90.201.108:3000', // http://3.90.201.108:3000, http://localhost:3000
+    origin: config.url + ':' + config.client.port, // http://3.90.201.108:3000, http://localhost:3000
     credentials: true,
 }));
 
@@ -25,9 +25,9 @@ app.use('/', ChatRoutes);
 app.use('/', router);
 
 
-const port = 3001;
-/*app.listen(3001, ()=>{
+const port = config.server.port;
+/*app.listen(port, ()=>{
     console.log(`Listening on port ${port}..`);
 })*/
-http.createServer(app).listen(3001);
-//https.createServer(app).listen(3001);
+http.createServer(app).listen(port);
+//https.createServer(app).listen(port);

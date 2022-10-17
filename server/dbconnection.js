@@ -1,10 +1,11 @@
 const mysql = require('mysql');
+const config = require('../data/config').development;
 const connection = mysql.createPool({
-    host: 'nodejs-rds.cfcfngacc7ov.us-east-1.rds.amazonaws.com',
-    port: 3306,
-    user: 'admin',
-    password: '12341234',
-    database: 'testdb',
+    host: config.database.host,
+    port: config.database.port,
+    user: config.database.user,
+    password: config.database.password,
+    database: config.database.db,
     multipleStatements: true
 });
 

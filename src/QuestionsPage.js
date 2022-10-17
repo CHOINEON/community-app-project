@@ -5,6 +5,10 @@ import BlueButtonLink from './BlueButtonLink'
 import Header1 from "./Header1"
 import axios from "axios"
 
+import config from './config';
+let url = config.development.url + ':' + config.development.server.port
+
+
 const HeaderRow = styled.div`
     display: grid;
     grid-template-columns: 1fr min-content;
@@ -14,7 +18,7 @@ const HeaderRow = styled.div`
 function QuestionsPage(){
     const [questions, setQuestions] = useState([]);
     function fetchQuestions(){
-        axios.get('http://3.90.201.108:3001/questions', {withCredentials: true})
+        axios.get(`${url}/questions/`, {withCredentials: true})
             .then(response => {
                 setQuestions(response.data);
             });

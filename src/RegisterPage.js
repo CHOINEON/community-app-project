@@ -8,11 +8,12 @@ import UserContext from './UserContext';
 import {Navigate} from 'react-router-dom';
 import ErrorBox from './ErrorBox';
 
+import config from './config';
+let url = config.development.url + ':' + config.development.server.port
+
 const Container = styled.div`
   padding: 30px 20px;
 `;
-
-
 
 function RegisterPage(){
     const {user, checkAuth} = useContext(UserContext);
@@ -23,7 +24,7 @@ function RegisterPage(){
 
     function register(e){
         e.preventDefault();
-        axios.post('http://3.90.201.108:3001/register',{
+        axios.post(`${url}/register/`,{
             email: email,
             password: password,
          },{withCredentials: true})

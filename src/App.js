@@ -12,12 +12,15 @@ import RegisterPage from './RegisterPage';
 import ProfilePage from './ProfilePage';
 import axios from 'axios';
 
+import config from './config';
+let url = config.development.url + ':' + config.development.server.port
+
 function App(){
   const [userSeq, setUserSeq] = useState(null);
   const [user, setUser] = useState(null);
   function checkAuth(){
     return new Promise(((resolve, reject) => {
-      axios.get('http://3.90.201.108:3001/profile', {withCredentials: true})
+      axios.get(`${url}/profile`, {withCredentials: true})
        .then((response) => {
          setUser({email:response.data});
          resolve(response.data);

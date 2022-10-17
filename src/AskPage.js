@@ -10,6 +10,9 @@ import axios from "axios";
 import {Navigate} from 'react-router-dom';
 import { socket } from './socket';
 
+import config from './config';
+let url = config.development.url + ':' + config.development.server.port
+
 const Container = styled.div`
     padding: 30px 20px;
 `;
@@ -42,7 +45,7 @@ function AskPage(){
     
     function sendQuestion(e) {
         e.preventDefault();
-        axios.post('http://3.90.201.108:3001/questions', {
+        axios.post(`${url}/questions/`, {
             title: questionTitle,
             content: questionBody,
         }, {withCredentials: true})

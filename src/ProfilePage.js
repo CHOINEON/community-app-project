@@ -6,16 +6,18 @@ import axios from "axios";
 import {Navigate} from 'react-router-dom';
 import UserContext from './UserContext';
 
+import config from './config';
+let url = config.development.url + ':' + config.development.server.port
+
 const Container = styled.div`
   padding: 30px 20px;
 `;
-
 
 function ProfilePage(){
     const {user, checkAuth} = useContext(UserContext);
     const [redirectToHomePage, setRedirectToHomePage] = useState(false);
     function logout(){
-        axios.post('http://3.90.201.108:3001/logout', {}, {withCredentials: true})
+        axios.post(`${url}/logout/`, {}, {withCredentials: true})
             .then(() => {
                 checkAuth().catch(() => setRedirectToHomePage(true));
         });

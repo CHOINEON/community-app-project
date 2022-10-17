@@ -9,6 +9,8 @@ import UserContext from './UserContext';
 import { socket } from './socket';
 import ChatBox from './ChatBox';
 
+import config from './config';
+let url = config.development.url + ':' + config.development.server.port
 
 const Container = styled.div`
     padding: 30px 20px;
@@ -41,7 +43,7 @@ function QuestionDetail(){
     const [joined, setJoined] = useState(false);
 
     function fetchQeustion() {
-        axios.get('http://3.90.201.108:3001/questions/' + question_id)
+        axios.get(`${url}/questions/` + question_id)
             .then(response => {
                 //console.log(response);
                 setQuestion(response.data);
@@ -49,7 +51,7 @@ function QuestionDetail(){
             });
     };
     function fetchChatRoom(){
-        axios.get('http://3.90.201.108:3001/chatRooms/' + question_id)
+        axios.get(`${url}/chatRooms/` + question_id)
             .then(response => {
                 //console.log(response);
                 let chatRoom = response.data.chatRoom;
@@ -63,7 +65,7 @@ function QuestionDetail(){
             });
     };
     function fetchUserInfo(){
-        axios.post('http://3.90.201.108:3001/getUser', {}, {withCredentials: true})
+        axios.post(`${url}/getUser/`, {}, {withCredentials: true})
             .then(response => {
                 console.log(response);
                 setUserSeq(response.data.User_seq);
@@ -72,7 +74,7 @@ function QuestionDetail(){
     }
 
     const sendMessage = () => {
-        axios.post('http://3.90.201.108:3001/chatting', {
+        axios.post(`${url}/chatting/`, {
             question_id: question_id,
             message: Msg,
         }, {withCredentials:true})
