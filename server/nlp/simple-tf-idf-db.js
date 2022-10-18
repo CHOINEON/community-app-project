@@ -23,7 +23,7 @@ function build_bag_of_words(bid, tokenized_document){
     let data = [];
     let N = tokenized_document.length;
     
-    // ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ÇÏ³ªÀÇ ¹®¼­·Î ÅëÇÕ
     for(let index in tokenized_document){
         for(let j in tokenized_document[index]){
             total_document.push(tokenized_document[index][j]);
@@ -31,15 +31,15 @@ function build_bag_of_words(bid, tokenized_document){
     }
     //console.log('total document : ', total_document);
     
-    // ï¿½Ü¾î¿¡ index ï¿½ï¿½ï¿½ï¿½
+    // ´Ü¾î¿¡ index ¸ÊÇÎ
     for(let word in total_document){
         if(word_to_index.get(total_document[word]) == null){
-            // Ã³ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ü¾ï¿½ Ã³ï¿½ï¿½
+            // Ã³À½ µîÀåÇÏ´Â ´Ü¾î Ã³¸®
             word_to_index.set(total_document[word], word_to_index.size);
         }
     }
     
-    // csrï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ bow ï¿½ï¿½ï¿½ï¿½ï¿½
+    // csrÇü½ÄÀ¸·Î bow ¸¸µé±â
     row.push(0);
 
     for(let index in tokenized_document){
@@ -54,7 +54,7 @@ function build_bag_of_words(bid, tokenized_document){
                 /*col_temp.push(i);
                 data_temp.push(1);*/
                 
-                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼
+                // ¿À¸§Â÷¼øÀ» À§ÇÑ °´Ã¼
                 bow_obj = {
                     'col':i,
                     'data':1,
@@ -126,20 +126,21 @@ function get_idf(bow, vocab){
     df.length = vocab.size;
     df.fill(0);
     
-    // df ï¿½ï¿½ï¿½Ï±ï¿½
-    for(let i in bow.col){// ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ columnï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ indexï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å´
+    // df ±¸ÇÏ±â
+    for(let i in bow.col){
+        // µîÀåÇÏ´Â column°ú µ¿ÀÏÇÑ indexÀÇ °ªÀ» 1¾¿ Áõ°¡½ÃÅ´
         df[bow.col[i]]++;
     }
     //console.log('document frequency : ', df);
 
     let idf = [];
-    let N = bow['numberOfDocuments']; // ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+    let N = bow['numberOfDocuments']; // ÀüÃ¼ ¹®¼­ÀÇ ¼ö
     idf.length = vocab.size;
     idf.fill(0);
     
-    // idf ï¿½ï¿½ï¿½Ï±ï¿½
+    // idf ±¸ÇÏ±â
     for(let i in idf){
-        idf[i] = 1 + Math.log((1 + N) / (1 + df[i])); // ï¿½Ú¿ï¿½ï¿½Î±ï¿½
+        idf[i] = 1 + Math.log((1 + N) / (1 + df[i])); // ÀÚ¿¬·Î±×
     }
     //console.log('inverse document frequency : ',idf);
     
@@ -147,11 +148,11 @@ function get_idf(bow, vocab){
 }
 
 function get_tfidf(bow, idf){
-    // tfidf ï¿½ï¿½ï¿½Ï±ï¿½
+    // tfidf ±¸ÇÏ±â
     let tfidf = {};
     let data_temp = [];
     
-    for(let i in bow.data){// data ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­
+    for(let i in bow.data){// data °³¼ö¸¸Å­
         data_temp.push(bow.data[i] * idf[bow.col[i]]);
     }
 
@@ -169,33 +170,34 @@ function get_tfidf(bow, idf){
 }
 
 function cosine_similarity(tfidf){
-    //0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½Ú»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½çµµï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-    let cos_sim = [];
+    //0¹ø ¹®¼­¿Í ´Ù¸¥ ¸ðµç ¹®¼­¸¦ ºñ±³ÇØ¼­ ÄÚ»çÀÎ À¯»çµµ¸¦ ±¸ÇÔ    let cos_sim = [];
     let zero_row = tfidf.row[1] - tfidf.row[0];
     let zero_col = [];
     let zero_data = [];
-    for(let i=0;i<zero_row;i++){// 0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ colmunï¿½ï¿½ dataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    for(let i=0;i<zero_row;i++){// 0¹ø ¹®¼­ÀÇ colmun°ú data¸¦ ÃßÃâ
         zero_col.push(tfidf.col[i]);
         zero_data.push(tfidf.data[i]);
     }
 
     let normalized_zero = normalize(zero_data);
     console.time('cal');
-    for(let i=0;i<tfidf.numberOfDocuments;i++){// ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ÀüÃ¼ ¹®¼­¿¡ ´ëÇØ
+    for(let i=0;i<tfidf.numberOfDocuments;i++){
         let scalar_product = 0;
         let comp_row = tfidf.row[i+1];
         let comp_col = [];
         let comp_data = [];
-        for(let j=tfidf.row[i];j<comp_row;j++){// iï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ colmunï¿½ï¿½ dataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        // i¹ø ¹®¼­ÀÇ colmun°ú data¸¦ ÃßÃâ
+        for(let j=tfidf.row[i];j<comp_row;j++){
             comp_col.push(tfidf.col[j]);
             comp_data.push(tfidf.data[j]);
         }
 
-        // ï¿½ï¿½Ä®ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï±ï¿½
+        // ï¿½ï¿½Ä®ï¿½ï¿½ï¿? ï¿½ï¿½ï¿½Ï±ï¿½
         for(let j in zero_data){// 0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidf ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­
             for(let k in comp_data){// iï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidf ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­
 
-                // 0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidfï¿½ï¿½ï¿½Í¿ï¿½ iï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidfï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä®ï¿½ï¿½ï¿½
+                // 0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidfï¿½ï¿½ï¿½Í¿ï¿½ iï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidfï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä®ï¿½ï¿½ï¿?
                 if(zero_col[j] === comp_col[k]){
                     scalar_product += zero_data[j] * comp_data[k];
                     break;
@@ -205,11 +207,11 @@ function cosine_similarity(tfidf){
 
         let cos_sim_temp = 0;
         if(scalar_product === 0){
-            // ï¿½ï¿½Ä®ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½Ì¸ï¿½ ï¿½Ú»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½çµµï¿½ï¿½ 0
+            // ½ºÄ®¶ó°öÀÌ 0ÀÌ¸é ÄÚ»çÀÎ À¯»çµµ´Â 0
             cos_sim_temp = 0;
         }
         else{
-            // ï¿½ï¿½Ä®ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½ ï¿½Æ´Ï¸ï¿½ ï¿½Ú»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½çµµ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+            // ½ºÄ®¶ó°öÀÌ 0ÀÌ ¾Æ´Ï¸é ÄÚ»çÀÎ À¯»çµµ °ø½Ä »ç¿ë
             cos_sim_temp = scalar_product / (normalized_zero * normalize(comp_data));
             cos_sim_temp = Number(cos_sim_temp.toFixed(4));
         }
@@ -221,14 +223,14 @@ function cosine_similarity(tfidf){
         cos_sim.push(cos_sim_obj);
     }
     console.timeEnd('cal');
-    // ï¿½ï¿½ï¿½çµµ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½    
+    // À¯»çµµ ³»¸²Â÷¼ø Á¤·Ä 
     console.time('sort');
     cos_sim.sort(function(a, b) {
         return b.similarity - a.similarity;
     });
     console.timeEnd('sort');
 
-    // ï¿½ï¿½ï¿½ï¿½ 5ï¿½ï¿½ï¿½ï¿½ bidï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // »óÀ§ 5°³ÀÇ bid¸¸ ÃßÃâ
     let top5_cos_sim_id = [];
     for(let i=1; i<6; i++){
         console.log(cos_sim[i]);
@@ -239,14 +241,15 @@ function cosine_similarity(tfidf){
 }
 
 function cosine_similarity_lastnum(tfidf){
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½Ú»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½çµµï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // 0¹ø ¹®¼­¿Í ´Ù¸¥ ¸ðµç ¹®¼­¸¦ ºñ±³ÇØ¼­ ÄÚ»çÀÎ À¯»çµµ¸¦ ±¸ÇÔ
     let cos_sim = [];
     let N = tfidf.numberOfDocuments;
     let last_row = tfidf.row[N] - tfidf.row[N-1];
     let last_col = [];
     let last_data = [];
     let last_col_start_index = tfidf.col.length - last_row;
-    for(let i=last_col_start_index;i<tfidf.col.length;i++){// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ colmunï¿½ï¿½ dataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ¸¶Áö¸· ¹øÈ£ ¹®¼­ÀÇ colmun°ú data¸¦ ÃßÃâ
+    for(let i=last_col_start_index;i<tfidf.col.length;i++){
         last_col.push(tfidf.col[i]);
         last_data.push(tfidf.data[i]);
     }
@@ -256,21 +259,23 @@ function cosine_similarity_lastnum(tfidf){
 
     let normalized_last = normalize(last_data);
     console.time('cal');
-    for(let i=0;i<tfidf.numberOfDocuments;i++){// ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ÀüÃ¼ ¹®¼­¿¡ ´ëÇØ
+    for(let i=0;i<tfidf.numberOfDocuments;i++){
         let scalar_product = 0;
         let comp_row = tfidf.row[i+1];
         let comp_col = [];
         let comp_data = [];
-        for(let j=tfidf.row[i];j<comp_row;j++){// iï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ colmunï¿½ï¿½ dataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        // i¹ø ¹®¼­ÀÇ colmun°ú data¸¦ ÃßÃâ
+        for(let j=tfidf.row[i];j<comp_row;j++){
             comp_col.push(tfidf.col[j]);
             comp_data.push(tfidf.data[j]);
         }
 
-        // ï¿½ï¿½Ä®ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï±ï¿½
+        // ï¿½ï¿½Ä®ï¿½ï¿½ï¿? ï¿½ï¿½ï¿½Ï±ï¿½
         /*for(let j in last_data){// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidf ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­
             for(let k in comp_data){// iï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidf ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­
 
-                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidfï¿½ï¿½ï¿½Í¿ï¿½ iï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidfï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä®ï¿½ï¿½ï¿½
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidfï¿½ï¿½ï¿½Í¿ï¿½ iï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidfï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä®ï¿½ï¿½ï¿?
                 if(last_col[j] === comp_col[k]){
                     scalar_product += last_data[j] * comp_data[k];
                     break;
@@ -278,7 +283,7 @@ function cosine_similarity_lastnum(tfidf){
             }
         }*/
         
-        // ï¿½ï¿½Ä®ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        // ½ºÄ®¶ó°ö ±¸ÇÏ±â ÅõÆ÷ÀÎÅÍ
         let last_pointer = 0;
         let comp_pointer = 0;
         let last_end = last_data.length - 1;
@@ -303,17 +308,18 @@ function cosine_similarity_lastnum(tfidf){
 
         let cos_sim_temp = 0;
         if(scalar_product === 0){
-            // ï¿½ï¿½Ä®ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½Ì¸ï¿½ ï¿½Ú»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½çµµï¿½ï¿½ 0
+            // ½ºÄ®¶ó°öÀÌ 0ÀÌ¸é ÄÚ»çÀÎ À¯»çµµ´Â 0
             continue;
             //cos_sim_temp = 0;
         }
         else{
-            // ï¿½ï¿½Ä®ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½ ï¿½Æ´Ï¸ï¿½ ï¿½Ú»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½çµµ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+            // ½ºÄ®¶ó°öÀÌ 0ÀÌ ¾Æ´Ï¸é ÄÚ»çÀÎ À¯»çµµ °ø½Ä »ç¿ë
             cos_sim_temp = scalar_product / (normalized_last * normalize(comp_data));
             cos_sim_temp = Number(cos_sim_temp.toFixed(4));
         }
 
-        if(cos_sim_temp > 0.1){ // ï¿½ï¿½ï¿½çµµï¿½ï¿½ 0.1ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½Ñ¾î°¨
+        // À¯»çµµ°¡ 0.1 ÀÌÇÏÀÎ ¹®¼­´Â Æ÷ÇÔÇÏÁö ¾ÊÀ½
+        if(cos_sim_temp > 0.1){
             let cos_sim_obj = {
                 'id':i,
                 'similarity':cos_sim_temp,
@@ -321,13 +327,13 @@ function cosine_similarity_lastnum(tfidf){
             cos_sim.push(cos_sim_obj);
         }
     }
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+    // À¯»çÇÑ ¹®¼­°¡ ¾øÀ¸¸é
     if(cos_sim.length === 0){
         console.log('no similar post');
         return;
     }
     console.timeEnd('cal');
-    // ï¿½ï¿½ï¿½çµµ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½    
+    // À¯»çµµ ¿À¸§Â÷¼ø Á¤·Ä  
     console.time('sort');
     cos_sim.sort(function(a, b) {
         return b.similarity - a.similarity;
@@ -335,7 +341,7 @@ function cosine_similarity_lastnum(tfidf){
     console.timeEnd('sort');
     //console.log(cos_sim);
 
-    // ï¿½ï¿½ï¿½ï¿½ 5ï¿½ï¿½ï¿½ï¿½ bidï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // »óÀ§ 5°³ÀÇ bid¸¸ ÃßÃâ
     let top5_cos_sim_id = [];
     for(let i=1; i<6; i++){
         console.log(cos_sim[i]);
@@ -347,25 +353,25 @@ function cosine_similarity_lastnum(tfidf){
 
 function similarity_test(document){
     console.time('time');
-    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å«È­
+    // ¹®¼­ ÅäÅ«È­
     let tokenized_document = tokenizer(document);
     //console.log('tokenized_document : ', tokenized_document);
     
-    // ï¿½ï¿½ï¿½ ï¿½Ü¾î¿¡ index ï¿½ï¿½ï¿½ï¿½
+    // ¸ðµç ´Ü¾î¿¡ index ¸ÊÇÎ
     let result = build_bag_of_words(tokenized_document);
     let vocab = result[0];
     let bow = result[1];
     
-    // ï¿½ï¿½ï¿½ ï¿½Ü¾ï¿½ï¿½ï¿½ idf ï¿½ï¿½ï¿½Ï±ï¿½
+    // ¸ðµç ´Ü¾îÀÇ idf ±¸ÇÏ±â
     let idf = get_idf(bow, vocab);
     
-    // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidf ï¿½ï¿½ï¿½Ï±ï¿½
+    // ¸ðµç ¹®¼­ÀÇ tfidf ±¸ÇÏ±â
     let tfidf = get_tfidf(bow, idf);
     
-    // 0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½çµµ ï¿½Ë»ï¿½
+    // 0¹ø ¹®¼­¿Í ³ª¸ÓÁö ¹®¼­ÀÇ À¯»çµµ °Ë»ç
     let cos_sim = cosine_similarity(tfidf);
     
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 5ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+    // À¯»çÇÑ 5°³ ¹®¼­ Ãâ·Â
     for(let i in cos_sim){
         console.log('id : ', cos_sim[i], ', ', document[cos_sim[i]]);
     }
@@ -375,24 +381,24 @@ function similarity_test(document){
 
 function similarity_test_token(tokenized_document){
     console.time('time');
-    // ï¿½ï¿½ï¿½ ï¿½Ü¾î¿¡ index ï¿½ï¿½ï¿½ï¿½
+    // ¸ðµç ´Ü¾î¿¡ index ¸ÊÇÎ
     let result = build_bag_of_words(tokenized_document);
     let vocab = result[0];
     let bow = result[1];
     
-    // ï¿½ï¿½ï¿½ ï¿½Ü¾ï¿½ï¿½ï¿½ idf ï¿½ï¿½ï¿½Ï±ï¿½
+    // ¸ðµç ´Ü¾îÀÇ idf ±¸ÇÏ±â
     let idf = get_idf(bow, vocab);
     
-    // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tfidf ï¿½ï¿½ï¿½Ï±ï¿½
+    // ¸ðµç ¹®¼­ÀÇ tfidf ±¸ÇÏ±â
     let tfidf = get_tfidf(bow, idf);
     
-    // 0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½çµµ ï¿½Ë»ï¿½
+    // 0¹ø ¹®¼­¿Í ³ª¸ÓÁö ¹®¼­ÀÇ À¯»çµµ °Ë»ç
     let cos_sim = cosine_similarity(tfidf);
     console.timeEnd('time');
 }
 
 function normalize(vector){
-    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½
+    // º¤ÅÍ Á¤±ÔÈ­ °ø½Ä
     let sum_square = 0;
     for(let i in vector){
         sum_square += vector[i] * vector[i];
@@ -403,15 +409,9 @@ function normalize(vector){
 
 function save_document_file(path, document){
     const fs = require('fs');
-    fs.writeFile(path, JSON.stringify(document), err => {
-        if(err){
-            console.error(err);
-            return;
-        }
-        else{
-            console.log('document saved in : ', path);
-        }
-    });
+    fs.writeFileSync(path, JSON.stringify(document));
+    console.log('document saved in : ', path);
+    console.log('document number: ', document.length);
 }
 
 function load_document_file(path){

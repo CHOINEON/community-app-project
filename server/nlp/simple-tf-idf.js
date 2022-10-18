@@ -98,7 +98,8 @@ function get_idf(bow, vocab){
     df.fill(0);
     
     // df 구하기
-    for(let i in bow.col){// 등장하는 column과 동일한 index의 값을 1씩 증가시킴
+    for(let i in bow.col){
+        // 등장하는 column과 동일한 index의 값을 1씩 증가시킴
         df[bow.col[i]]++;
     }
     //console.log('document frequency : ', df);
@@ -144,19 +145,21 @@ function cosine_similarity(tfidf){
     let zero_row = tfidf.row[1] - tfidf.row[0];
     let zero_col = [];
     let zero_data = [];
-    for(let i=0;i<zero_row;i++){// 0번 문서의 colmun과 data를 추출
+    // 0번 문서의 colmun과 data를 추출
+    for(let i=0;i<zero_row;i++){
         zero_col.push(tfidf.col[i]);
         zero_data.push(tfidf.data[i]);
     }
 
     let normalized_zero = normalize(zero_data);
-
-    for(let i=0;i<tfidf.numberOfDocuments;i++){// 전체 문서에 대해
+    // 전체 문서에 대해
+    for(let i=0;i<tfidf.numberOfDocuments;i++){
         let scalar_product = 0;
         let comp_row = tfidf.row[i+1];
         let comp_col = [];
         let comp_data = [];
-        for(let j=tfidf.row[i];j<comp_row;j++){// i번 문서의 colmun과 data를 추출
+        // i번 문서의 colmun과 data를 추출
+        for(let j=tfidf.row[i];j<comp_row;j++){
             comp_col.push(tfidf.col[j]);
             comp_data.push(tfidf.data[j]);
         }

@@ -13,6 +13,10 @@ const saveDataFile = require('../nlp/save-data-file');
 //let server_tfidf = nat.load_document_file('/home/ksh/node-project/server/tfidf_DBdata_' + NUM);
 //console.log(server_tfidf);
 
+router.get('/', (req, res) => {
+    res.send('express server')
+})
+
 router.get('/api/csvToDB', (req, res) =>{
     let path = './data/csv/stackoverflow 50k.csv';
     saveDataFile.csv_to_DB(path);
@@ -85,7 +89,10 @@ router.get('/api/NLPTfidfFileTest', (req, res) => {
     res.send('done');
 });
 
-
+router.get('/api/saveInvertedIndex', (req, res) => {
+    saveDataFile.save_invertedIndex_file();
+    res.send('done');
+})
 
 // router.get('/api/NLPwithTfidfFile', async (req, res) => {
 //     console.time('runtime');
