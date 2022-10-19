@@ -434,7 +434,7 @@ function tokenize_DBdata(path, flag){
     else if(flag === 'content'){
         for(let i in DBdata){
           bid.push(DBdata[i].bid);
-          title.push(DBdata[i].title + DBdata[i].content);
+          title.push(DBdata[i].title + ' ' + DBdata[i].content);
       }
     }
     else{

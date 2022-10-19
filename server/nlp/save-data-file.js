@@ -385,10 +385,12 @@ async function save_invertedIndex_file(){
     // 현재 DB 데이터를 가져옴
     function asyncFetch(){
         return new Promise((resolve, rejects) => {
-            //console.log(1);    
-            db.query('select bid, title, content from board2 Limit 10', (err, rows) => {
-                if(err) return rejects();
+            //console.log(1);
+            let qry = 'select bid, title, content from board2 order by bid DESC Limit 3';
+            db.query(qry , (err, rows) => {
+                if(err) return rejects(err);
                 DBdata = rows.map(v => Object.assign({}, v));
+                let cur_bid = DBdata[0].bid;
                 let zero = {
                     bid: 0,
                     title: '',
@@ -402,6 +404,8 @@ async function save_invertedIndex_file(){
                 //console.log(document);
                 let path = './data/cur_DB';
                 simpleTfidfDB.save_document_file(path, document);
+                path = './data/cur_bid';
+                simpleTfidfDB.save_document_file(path, cur_bid);
                 return resolve();
             })
         })
@@ -491,6 +495,104 @@ async function save_invertedIndex_file(){
     return;
 }
 
+async function update_invertedIndex_file(){
+    let tokenized = [];
+    // 최신 bid 가져옴
+    function get_latest_bid(){
+        return new Promise((resolve, rejects) => {
+            db.query('select bid from board2 order by bid DESC LIMIT 1', (err, row) => {
+                if(err) return rejects(err);
+                return resolve(row[0].bid);
+            })
+        })
+    }
+    // 업데이트해야 할 게시글 가져옴
+    function get_latest_posts(cur, latest){
+        return new Promise((resolve, rejects) => {
+            let qry = 'select * from board2 order by bid DESC LIMIT ?';
+            db.query(qry, [latest-cur], (err, rows) => {
+                if(err) return rejects(err);
+                let DBdata = rows.map(v => Object.assign({}, v));
+                let path = './data/latest_DB';
+                simpleTfidfDB.save_document_file(path, DBdata);
+                return resolve();
+            })
+        })
+    }
+    // 토큰화
+    function asyncTokenize(){
+        return new Promise((resolve, rejects) => {
+            let path = './data/latest_DB';
+            tokenized = simpleTfidfDB.tokenize_DBdata(path, 'content');
+            let bid = tokenized[0];
+            let content = tokenized[1];
+            // 중복단어 제거
+            for(let i=0;i<bid.length;i++){
+                if(content[i].length === 0) continue;
+                let uniqueWords = [];
+                content[i].forEach((element) => {
+                    if(!uniqueWords.includes(element)){
+                        uniqueWords.push(element);
+                    }
+                });
+                tokenized[1][i] = uniqueWords;
+            }
+
+            path = './data/latest_token_DB'
+            simpleTfidfDB.save_document_file(path, tokenized);
+            return resolve();
+        })
+    }
+    let cur_bid = simpleTfidfDB.load_document_file('./data/cur_bid');
+    let latest_bid = await get_latest_bid();
+    console.log(cur_bid, latest_bid);
+    if(cur_bid === latest_bid) return;
+
+    await get_latest_posts(cur_bid, latest_bid);
+    await asyncTokenize();
+    let invertedIndex = simpleTfidfDB.load_document_file('./data/cur_invertedIndex_DB');
+    let bid = tokenized[0];
+    let content = tokenized[1];
+
+    for(let i=0;i<bid.length;i++){
+        //console.log(bid[i]);
+        //console.log(content[i]);
+        if(content[i].length === 0) continue;
+
+        // 게시글에 있는 단어 순회
+        for(word of content[i]){
+            let found = 0;
+            // 역색인에 이미 있는 단어면 bid만 추가함
+            for(let j=0;j<invertedIndex.length;j++){
+                item = invertedIndex[j];
+                if(item.word === word){
+                    found = 1;
+                    item.bid.push(bid[i]);
+                    break;
+                }
+            }
+            // 역색인에 없는 단어면 새로운 오브젝트로 추가 후 정렬
+            if(!found){
+                let temp = {
+                    word: word,
+                    bid: [bid[i]]
+                }
+                invertedIndex.push(temp);
+                invertedIndex.sort((a, b) => {
+                    return ( a.word < b.word ) ? -1 : ( a.word == b.word ) ? 0 : 1;
+                })
+            }
+        }
+    }
+
+    let path = './data/cur_invertedIndex_DB';
+    simpleTfidfDB.save_document_file(path, invertedIndex);
+    path = './data/cur_bid';
+    simpleTfidfDB.save_document_file(path, latest_bid);
+
+    return;
+}
+
 
 
 module.exports = {
@@ -502,4 +604,5 @@ module.exports = {
     NLP_token_file,
     NLP_tfidf_file,
     save_invertedIndex_file,
+    update_invertedIndex_file,
 };

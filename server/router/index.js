@@ -94,6 +94,11 @@ router.get('/api/saveInvertedIndex', (req, res) => {
     res.send('done');
 })
 
+router.get('/api/updateInvertedIndex', (req, res) => {
+    saveDataFile.update_invertedIndex_file();
+    res.send('done');
+})
+
 // router.get('/api/NLPwithTfidfFile', async (req, res) => {
 //     console.time('runtime');
 //     let natural = require('../natural.js');
