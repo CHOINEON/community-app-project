@@ -386,8 +386,9 @@ async function save_invertedIndex_file(){
     function asyncFetch(){
         return new Promise((resolve, rejects) => {
             //console.log(1);
-            let qry = 'select bid, title, content from board2 order by bid DESC Limit 3';
-            db.query(qry , (err, rows) => {
+            let qry = 'select bid, title, content from board2 order by bid DESC Limit 100';
+            let qry2 = 'select bid, title, content from board2 order by bid DESC';
+            db.query(qry2 , (err, rows) => {
                 if(err) return rejects(err);
                 DBdata = rows.map(v => Object.assign({}, v));
                 let cur_bid = DBdata[0].bid;
@@ -415,7 +416,7 @@ async function save_invertedIndex_file(){
         return new Promise((resolve, rejects) => {
             //console.log(2);
             let path = './data/cur_DB';
-            tokenized = simpleTfidfDB.tokenize_DBdata(path, 'content');
+            tokenized = simpleTfidfDB.tokenize_DBdata(path, 'content', 0);
             let bid = tokenized[0];
             let content = tokenized[1];
             // 중복단어 제거
@@ -423,8 +424,10 @@ async function save_invertedIndex_file(){
                 if(content[i].length === 0) continue;
                 let uniqueWords = [];
                 content[i].forEach((element) => {
-                    if(!uniqueWords.includes(element)){
-                        uniqueWords.push(element);
+                    if(element.length<16){
+                        if(!uniqueWords.includes(element)){
+                            uniqueWords.push(element);
+                        }
                     }
                 });
                 tokenized[1][i] = uniqueWords;
@@ -437,18 +440,24 @@ async function save_invertedIndex_file(){
     }
 
     console.time('DB fetch');
-    await asyncFetch();
+    //await asyncFetch();
     console.timeEnd('DB fetch');
     console.time('tokenize');
-    await asyncTokenize();
+    //await asyncTokenize();
     console.timeEnd('tokenize');
-    
+    tokenized = simpleTfidfDB.load_document_file('./data/cur_token_DB');
+    let sum = 0;
+    for(let i=0;i<tokenized[0].length;i++){
+        sum += tokenized[1][i].length;
+    }
+    console.log(sum/tokenized[0].length);
+
     console.time('make inverted index');
     let invertedIndex = []; // {word: a, bid: []}
     let bid = tokenized[0];
     let content = tokenized[1];
     for(let i=0;i<bid.length;i++){
-        //console.log(bid[i]);
+        console.log(bid[i]);
         //console.log(content[i]);
         if(content[i].length === 0) continue;
 
@@ -472,22 +481,23 @@ async function save_invertedIndex_file(){
                         break;
                     }
                 }
-                // 역색인에 없는 단어면 새로운 오브젝트로 추가 후 정렬
+
+                // 역색인에 없는 단어면 새로운 오브젝트로 추가
                 if(!found){
                     let temp = {
                         word: word,
                         bid: [bid[i]]
                     }
                     invertedIndex.push(temp);
-                    invertedIndex.sort((a, b) => {
-                        return ( a.word < b.word ) ? -1 : ( a.word == b.word ) ? 0 : 1;
-                    })
                 }
             }
         }        
     }
     //console.log(invertedIndex);
-
+    // 사전 순으로 정렬
+    invertedIndex.sort((a, b) => {
+        return ( a.word < b.word ) ? -1 : ( a.word == b.word ) ? 0 : 1;
+    })
     let path = './data/cur_invertedIndex_DB';
     simpleTfidfDB.save_document_file(path, invertedIndex);
     console.timeEnd('make inverted index');
@@ -543,6 +553,8 @@ async function update_invertedIndex_file(){
             return resolve();
         })
     }
+
+    console.time('inverted index update time');
     let cur_bid = simpleTfidfDB.load_document_file('./data/cur_bid');
     let latest_bid = await get_latest_bid();
     console.log(cur_bid, latest_bid);
@@ -571,28 +583,32 @@ async function update_invertedIndex_file(){
                     break;
                 }
             }
-            // 역색인에 없는 단어면 새로운 오브젝트로 추가 후 정렬
+
+            // 역색인에 없는 단어면 새로운 오브젝트로 추가
             if(!found){
                 let temp = {
                     word: word,
                     bid: [bid[i]]
                 }
                 invertedIndex.push(temp);
-                invertedIndex.sort((a, b) => {
-                    return ( a.word < b.word ) ? -1 : ( a.word == b.word ) ? 0 : 1;
-                })
             }
         }
     }
+    // 사전 순으로 정렬
+    console.time('sort time');
+    invertedIndex.sort((a, b) => {
+        return ( a.word < b.word ) ? -1 : ( a.word == b.word ) ? 0 : 1;
+    })
+    console.timeEnd('sort time');
 
     let path = './data/cur_invertedIndex_DB';
     simpleTfidfDB.save_document_file(path, invertedIndex);
     path = './data/cur_bid';
     simpleTfidfDB.save_document_file(path, latest_bid);
+    console.timeEnd('inverted index update time');
 
     return;
 }
-
 
 
 module.exports = {

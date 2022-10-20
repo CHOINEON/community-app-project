@@ -1,11 +1,15 @@
-function tokenizer(document){
+function tokenizer(document, stop){
     const mecab = require('mecab-ya');
     const stopword = require('./stopword');
+    const alphabet = require('./stopwords_alphabet.js').alphabet;
     
     let tokenized_document = [];
     for(let i in document){
         let tokens = mecab.nounsSync(document[i]);
-        tokens = stopword.remove_stopwords(tokens);
+        if(stop) {
+            tokens = stopword.remove_stopwords(tokens);
+        }
+        tokens = stopword.remove_stopwords(tokens, alphabet);
         for(let i in tokens){
             tokens[i] = tokens[i].toLowerCase();
         };
@@ -420,7 +424,7 @@ function load_document_file(path){
     return JSON.parse(readData.toString());
 }
 
-function tokenize_DBdata(path, flag){
+function tokenize_DBdata(path, flag, stopword){
     let DBdata = load_document_file(path);
     let bid = [];
     let title = [];
@@ -442,7 +446,7 @@ function tokenize_DBdata(path, flag){
         return;
     }
 
-    let tokenized_title = tokenizer(title);
+    let tokenized_title = tokenizer(title, stopword);
 
     return [bid, tokenized_title];
 }
