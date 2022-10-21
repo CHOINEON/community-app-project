@@ -80,7 +80,16 @@ UserRoutes.get('/profile', (req, res) => {
             res.status(403).send();
         }
         else{
-            res.json(data);//.send();
+            const qry = 'select User_seq from Member where token=?';
+            db.query(qry, [token], (err, rows) => {
+                if(err) res.sendStatus(422);
+                //console.log(rows[0].User_seq);
+                let info = {
+                    seq: rows[0].User_seq,
+                    email: data
+                }
+                res.json(info);
+            })
         }
     })
 })

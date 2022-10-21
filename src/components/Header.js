@@ -1,5 +1,6 @@
 import styled from "styled-components"
-import { useContext } from "react";
+import { useContext, useState } from "react";
+import {Navigate, useNavigate} from 'react-router-dom';
 import { Link } from "react-router-dom"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
@@ -58,15 +59,34 @@ const ProfileLink = styled(Link)`
 `
 
 function Header() {
+    const navigate = useNavigate();
     const {user} = useContext(UserContext);
+    const [searchInput, setSearchInput] = useState('');
+    const [terms, setTerms] = useState('');
+    const [redirect, setRedirect] = useState(false);
+    function onSearchEnter(e){
+        e.preventDefault();
+        console.log(redirect);
+        navigate(redirect);
+    }
+    console.log(searchInput);
+    console.log(redirect);
     return(
         <StyledHeader>
             <LogoLink to={'/'} className="logo">
                 <FontAwesomeIcon icon={faBars} size="2x" />
                 <span>Test<b>Search</b></span>
             </LogoLink>
-            <form action="" className="search">
-                <SearchInput type="text" placeholder="Search..."/>
+            <form action="" className="search" onSubmit={onSearchEnter}>
+                <SearchInput 
+                    type="text" 
+                    placeholder="Search..." 
+                    value={searchInput}
+                    onChange={e => {
+                        setSearchInput(e.target.value);
+                        setRedirect('/search/' + e.target.value.replace(/ /gi, '+'));
+                    }}
+                    />
             </form>
             {user && (
                 <ProfileLink to={'/profile'} className="profile">{user.email}</ProfileLink>

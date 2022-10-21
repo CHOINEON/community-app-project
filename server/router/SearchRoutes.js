@@ -43,16 +43,40 @@ function find_terms(terms){
 }
 
 SearchRoutes.get('/search/:terms', (req, res) => {
+    console.time('inverted index + db query time');
+    //console.time('db query time');
     let terms = req.params.terms;
     terms = terms.split('+');
     //console.log(terms);
     console.log(`Search ${terms}`);
-    console.time('search time');
-    let result = find_terms(terms);
-    console.timeEnd('search time');
-    console.log(result);
+    console.time('binary search time');
+    let bids = find_terms(terms);
+    bids.sort((a, b) =>{
+        return b - a;
+    })
+    console.timeEnd('binary search time');
+    //console.log(bids);
+    console.log('number of bids containing search terms: ', bids.length);
+    if(bids.length === 0){
+        res.sendStatus(404);
+        return;
+    }
 
-    res.send(result);
+    db.query('select * from board2 where bid IN (?) order by bid DESC Limit 15', [bids], (err, rows) =>{
+        if(err) res.sendStatus(422);
+        let DBdata = rows.map(v => Object.assign({}, v));
+        //console.log(DBdata);
+        console.timeEnd('inverted index + db query time');
+        res.send(DBdata);
+    })
+    
+    // 단순한 db 쿼리 비교용
+    // db.query('select * from board2 where content regexp \'koko\' order by bid DESC Limit 15', (err, rows) => {
+    //     if(err) res.sendStatus(422);
+    //     let DBdata = rows.map(v => Object.assign({}, v));
+    //     console.timeEnd('db query time');
+    // })
+    // res.send('done');
 })
 
 module.exports = SearchRoutes;

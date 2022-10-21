@@ -8,6 +8,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import QuestionDetailPage from './pages/QuestionDetailPage';
+import SearchPage from './pages/SearchPage';
+//import DebatePage from './pages/DebatePage';
 
 import Header from './components/Header';
 import GlobalStyles from './GlobalStyles';
@@ -18,14 +20,17 @@ import config from './config';
 let url = config.development.url + ':' + config.development.server.port
 
 function App(){
-  const [userSeq, setUserSeq] = useState(null);
   const [user, setUser] = useState(null);
   function checkAuth(){
     return new Promise(((resolve, reject) => {
       axios.get(`${url}/profile`, {withCredentials: true})
        .then((response) => {
-         setUser({email:response.data});
-         resolve(response.data);
+        //console.log(response);
+        setUser({
+          seq: response.data.seq,
+          email: response.data.email
+        });
+        resolve(response.data);
        })
        .catch(response => {
          setUser(null);
@@ -52,6 +57,7 @@ function App(){
             <Route path='/profile' element={<ProfilePage/>}/>
             <Route path='/ask' element={<AskPage/>}/>
             <Route path='/questions/:id' element={<QuestionDetailPage/>}/>
+            <Route path='/search/:terms' element={<SearchPage/>}/>
           </Routes>          
         </UserContext.Provider>
       </Router>

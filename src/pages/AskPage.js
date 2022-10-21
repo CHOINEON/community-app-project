@@ -52,9 +52,6 @@ function AskPage(){
             .then(response => {
                 console.log(response);
                 setRedirect('/questions/' + response.data.insertId);
-
-                // make chatting room
-                socket.emit('make room', response.data.insertId);
             });
     }
 
