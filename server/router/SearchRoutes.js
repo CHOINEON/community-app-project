@@ -58,7 +58,8 @@ SearchRoutes.get('/search/:terms', (req, res) => {
     //console.log(bids);
     console.log('number of bids containing search terms: ', bids.length);
     if(bids.length === 0){
-        res.sendStatus(404);
+        res.status(404).send(`No search results match ${terms}`);
+        console.timeEnd('inverted index + db query time');
         return;
     }
 

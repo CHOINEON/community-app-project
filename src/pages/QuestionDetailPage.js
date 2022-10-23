@@ -32,7 +32,6 @@ function QuestionDetailPage(){
         fetchQeustion();
     },[]);
 
-
     return(
         <>
             <Container>
