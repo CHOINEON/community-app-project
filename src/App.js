@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import QuestionDetailPage from './pages/QuestionDetailPage';
 import SearchPage from './pages/SearchPage';
+import MakeDebatePage from './pages/MakeDebatePage';
 //import DebatePage from './pages/DebatePage';
 
 import Header from './components/Header';
@@ -58,6 +59,7 @@ function App(){
             <Route path='/ask' element={<AskPage/>}/>
             <Route path='/questions/:id' element={<QuestionDetailPage/>}/>
             <Route path='/search/:terms' element={<SearchPage/>}/>
+            <Route path='/make' element={<MakeDebatePage/>}/>
           </Routes>          
         </UserContext.Provider>
       </Router>

@@ -44,10 +44,12 @@ function find_terms(terms){
 
 SearchRoutes.get('/search/:terms', (req, res) => {
     console.time('inverted index + db query time');
-    //console.time('db query time');
+    
     let terms = req.params.terms;
+    let terms_DB = terms.replace(/\+/g, '|');
     terms = terms.split('+');
     //console.log(terms);
+    //console.log(terms_DB);
     console.log(`Search ${terms}`);
     console.time('binary search time');
     let bids = find_terms(terms);
@@ -70,13 +72,14 @@ SearchRoutes.get('/search/:terms', (req, res) => {
         console.timeEnd('inverted index + db query time');
         res.send(DBdata);
     })
-    
+    console.time('db query time');
     // 단순한 db 쿼리 비교용
-    // db.query('select * from board2 where content regexp \'koko\' order by bid DESC Limit 15', (err, rows) => {
-    //     if(err) res.sendStatus(422);
-    //     let DBdata = rows.map(v => Object.assign({}, v));
-    //     console.timeEnd('db query time');
-    // })
+    let qry = `select * from board2 where content regexp '${terms_DB}' order by bid DESC Limit 15`;
+    db.query(qry, (err, rows) => {
+        if(err) console.log(err);//res.sendStatus(422);
+        let DBdata2 = rows.map(v => Object.assign({}, v));
+        console.timeEnd('db query time');
+    })
     // res.send('done');
 })
 

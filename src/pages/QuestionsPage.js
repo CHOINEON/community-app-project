@@ -29,6 +29,7 @@ function QuestionsPage(){
             <HeaderRow>
                 <Header1 style={{margin:0}}>All Questions</Header1>
                 <BlueButtonLink to={'/ask'}>Ask&nbsp;Questions</BlueButtonLink>
+                <BlueButtonLink to={'/make'}>Make&nbsp;Debates</BlueButtonLink>
             </HeaderRow>
             <div>
                 {questions && questions.length > 0 && questions.map((question) => (
