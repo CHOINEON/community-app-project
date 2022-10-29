@@ -3,7 +3,7 @@ import Bluebutton from "../components/BlutButton"
 import { Link } from "react-router-dom"
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import Header1 from "../components/Header1"
 import Input from "../components/Input";
 import axios from "axios";
@@ -11,6 +11,9 @@ import {Navigate} from 'react-router-dom';
 import { socket } from '../socket';
 
 import config from '../config';
+import ErrorBox from "../components/ErrorBox";
+import UserContext from '../UserContext';
+
 let url = config.development.url + ':' + config.development.server.port
 
 const Container = styled.div`
@@ -37,14 +40,26 @@ const PreviewArea = styled.div`
 `
 
 function AskPage(){
+    const {user, checkAuth} = useContext(UserContext);
 
     const [questionTitle, setQuestionTitle] = useState('');
     const [questionBody, setQuestionBody] = useState('');
     const [redirect, setRedirect] = useState(false);
+    const [error, setError] = useState(null);
 
+    useEffect(() => {
+        checkAuth()
+            .then(() => {
+                console.log(user.seq, user.email);
+            })
+            .catch(() => {
+                setError('please log in first');
+            });
+    }, [])
     
     function sendQuestion(e) {
         e.preventDefault();
+        if(user === null) return;
         axios.post(`${url}/questions/`, {
             title: questionTitle,
             content: questionBody,
@@ -52,6 +67,10 @@ function AskPage(){
             .then(response => {
                 console.log(response);
                 setRedirect('/questions/' + response.data.insertId);
+            })
+            .catch(err => {
+                console.log(err);
+                setError(err.response.data);
             });
     }
 
@@ -76,7 +95,13 @@ function AskPage(){
                 <PreviewArea>
                     <ReactMarkdown plugins={[remarkGfm]} children={questionBody}/>
                 </PreviewArea>
-                
+
+                {error && 
+                    <div>
+                        <ErrorBox>{error}</ErrorBox>
+                    </div>
+                }
+
                 <Bluebutton type={'submit'}>Post Question</Bluebutton>                
             </form>
         </Container>

@@ -8,6 +8,7 @@ QuestionRoutes.post('/questions', (req, res) =>{
     const qry1 = 'select User_seq from Member where token=?';
     db.query(qry1, [token], (err, rows) => {
         if(err) res.status(422).send('something went wrong. Sorry');
+        if(rows.length === 0) {res.status(401).send('please log in first'); return;}
         else{
             const user_seq = rows[0].User_seq;
             if(rows[0] && user_seq){
@@ -25,8 +26,6 @@ QuestionRoutes.post('/questions', (req, res) =>{
             }
         }
     });
-
-
 });
 
 QuestionRoutes.get('/questions/:id', (req, res) => {

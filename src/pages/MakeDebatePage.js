@@ -3,7 +3,7 @@ import styled from "styled-components"
 import Bluebutton from "../components/BlutButton"
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Header1 from "../components/Header1"
 import Input from "../components/Input";
 import axios from "axios";
@@ -11,7 +11,9 @@ import {Navigate} from 'react-router-dom';
 import { socket } from '../socket';
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
+import { ko } from "date-fns/esm/locale";
 import ErrorBox from "../components/ErrorBox";
+import UserContext from '../UserContext';
 
 
 
@@ -58,15 +60,22 @@ const StyledDatePicker = styled(DatePicker)`
 
 
 function MakeDebatePage(){
-
+    const {user, checkAuth} = useContext(UserContext);
     const [debateTitle, setDebateTitle] = useState('');
     const [debateBody, setDebateBody] = useState('');
     const [redirect, setRedirect] = useState(false);
     const [startDate, setStartDate] = useState(new Date());
+    const [serverStartDate, setServerStartDate] = useState('');
     const [endDate, setEndDate] = useState(new Date());
-    const [error, setError] = useState(null);
+    const [serverEndDate, setServerEndDate] = useState('');
+    const [dateError, setDateError] = useState(null);
+    const [authError, setAuthError] = useState(null);
+    console.log(user);
     console.log(startDate);
     console.log(endDate);
+    console.log(serverStartDate);
+    console.log(serverEndDate);
+
     const filterPassedTime = (time) => {
         const currentDate = new Date();
         const selectedDate = new Date(time);
@@ -78,24 +87,44 @@ function MakeDebatePage(){
     
         return startDate.getTime() < selectedDate.getTime();
     };
+    function timestamp(date){
+        let temp = new Date(date.getTime());
+        temp.setHours(temp.getHours() + 9);
+        return temp.toISOString().replace('T', ' ').substring(0, 23);
+    }
     function sendDebate(e) {
         e.preventDefault();
+        if(user === null || dateError !== null) return;
         axios.post(`${url}/debates/`, {
             title: debateTitle,
             content: debateBody,
+            user: user.seq,
+            startDate: serverStartDate,
+            endDate: serverEndDate,
         }, {withCredentials: true})
             .then(response => {
                 console.log(response);
-                setRedirect('/debates/' + response.data.insertId);
+                //setRedirect('/debates/' + response.data.insertId);
             });
     }
     useEffect(() => {
+        checkAuth()
+            .then(() => {
+                console.log(user.seq, user.email);
+            })
+            .catch(() => {
+                setAuthError('please log in first');
+            });
+    }, [])
+    useEffect(() => {
         if(startDate.getTime() < endDate.getTime()){
-            setError(null);
+            setDateError(null);
+            setServerStartDate(timestamp(startDate));
+            setServerEndDate(timestamp(endDate));
         }
         else{
             setEndDate(startDate);
-            setError('end time must be later than start time');            
+            setDateError('end time must be later than start time');            
         }
     }, [startDate, endDate]);
 
@@ -123,31 +152,39 @@ function MakeDebatePage(){
                     <ReactMarkdown plugins={[remarkGfm]} children={debateBody}/>
                 </PreviewArea>
 
+                {dateError && 
+                    <div>
+                        <ErrorBox>{dateError}</ErrorBox>
+                    </div>
+                }
                 <div>
                     <StyledDateTitle>Debate start time</StyledDateTitle>
                     <StyledDatePicker
+                        locale={ko}
                         selected={startDate}
                         onChange={(date) => setStartDate(date)}
                         showTimeSelect
+                        timeIntervals={15}
                         filterTime={filterPassedTime}
-                        dateFormat="MMMM d, yyyy h:mm aa"
+                        dateFormat="yyyy-MM-dd aa h:mm"
                     />                    
                 </div>
-
                 <div>
                     <StyledDateTitle>Debate end time</StyledDateTitle>
                     <StyledDatePicker
+                        locale={ko}
                         selected={endDate}
                         onChange={(date) => setEndDate(date)}
                         showTimeSelect
+                        timeIntervals={15}
                         filterTime={filterEndTime}
-                        dateFormat="MMMM d, yyyy h:mm aa"
+                        dateFormat="yyyy-MM-dd aa h:mm"
                     />
                 </div>
                 
-                {error && 
+                {authError && 
                     <div>
-                        <ErrorBox>{error}</ErrorBox>
+                        <ErrorBox>{authError}</ErrorBox>
                     </div>
                 }
 

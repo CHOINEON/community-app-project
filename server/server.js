@@ -10,6 +10,7 @@ const QuestionRoutes = require('./router/QuestionRoutes.js');
 const UserRoutes = require('./router/UserRoutes.js');
 const ChatRoutes = require('./router/ChatRoutes.js');
 const SearchRoutes = require('./router/SearchRoutes.js');
+const DebateRoutes = require('./router/DebateRoutes.js');
 const config = require('../data/config.js').development;
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/', UserRoutes);
 app.use('/', QuestionRoutes);
 app.use('/', ChatRoutes);
 app.use('/', SearchRoutes);
+app.use('/', DebateRoutes);
 app.use('/', router);
 
 
