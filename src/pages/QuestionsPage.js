@@ -8,6 +8,11 @@ import axios from "axios"
 import config from '../config';
 let url = config.development.url + ':' + config.development.server.port
 
+const Container = styled.div`
+    max-width: 820px;
+    flex-grow: 1;
+`
+
 const HeaderRow = styled.div`
     display: grid;
     grid-template-columns: 1fr min-content;
@@ -25,11 +30,10 @@ function QuestionsPage(){
     useEffect(() => fetchQuestions(), []);
     
     return(
-        <main>
+        <Container>
             <HeaderRow>
                 <Header1 style={{margin:0}}>All Questions</Header1>
                 <BlueButtonLink to={'/ask'}>Ask&nbsp;Questions</BlueButtonLink>
-                <BlueButtonLink to={'/make'}>Make&nbsp;Debates</BlueButtonLink>
             </HeaderRow>
             <div>
                 {questions && questions.length > 0 && questions.map((question) => (
@@ -41,7 +45,7 @@ function QuestionsPage(){
                     />
                 ))}
             </div>
-        </main>
+        </Container>
     )
 }
 

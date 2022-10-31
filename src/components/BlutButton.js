@@ -8,6 +8,9 @@ const BlueButton = styled.button`
     padding: 12px 15px;
     text-decoration: none;
     font-size: 1.1rem;
+    &:hover{
+        cursor: pointer;
+    }
 `
 
 export default BlueButton;

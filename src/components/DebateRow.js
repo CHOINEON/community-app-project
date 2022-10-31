@@ -43,7 +43,7 @@ const StyledQuestionRow = styled.div`
     background-color: rgba(240,240,240,0.5);
     padding: 15px 15px 10px;
     display: grid;
-    grid-template-columns: repeat(3, 50px) 1fr;
+    grid-template-columns: repeat(1, 50px) 1fr;
     border-top: 1px solid #a1a1a1;
 `
 const WhoAndWhen = styled.div`
@@ -57,19 +57,15 @@ const UserLink = styled.a`
     color: #3ca4ff;
 `
 
-function QuestionRow({bid, id, title, content}){
-    
+function DebateRow({bid, id, title, content}){
     return(
         <StyledQuestionRow>
-            <QuestionStat>0<span>votes</span></QuestionStat>
-            <QuestionStat>2<span>answers</span></QuestionStat>
             <QuestionStat>4<span>views</span></QuestionStat>
             <QuestionTitleArea>
-                <QuestionLink to={`/questions/${id}`}>
+                <QuestionLink to={`/debates/${id}`}>
                     {title}
                 </QuestionLink>
-                <QuestionSummary>{content && (content.length>150 ? content.substr(0,150) + '...' : content)}</QuestionSummary>
-                <Tag>javascript</Tag>
+                <QuestionSummary>{content}</QuestionSummary>
                 <WhoAndWhen>
                     asked 2 mins ago <UserLink>user</UserLink>
                 </WhoAndWhen>
@@ -78,10 +74,10 @@ function QuestionRow({bid, id, title, content}){
     )
 }
 
-QuestionRow.propTypes = {
+DebateRow.propTypes = {
     id: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
     content: PropTypes.string.isRequired,
 }
 
-export default QuestionRow;
+export default DebateRow;

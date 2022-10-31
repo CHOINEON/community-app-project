@@ -1,4 +1,5 @@
 const express = require('express');
+const db = require('../dbconnection');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, { cors: { origin: "*" } });
@@ -15,60 +16,64 @@ console.log('Chat Server listening at port %d', port);
 //app.use(express.static(path.join(__dirname, 'public')));
 
 // Chatroom
-let rooms = [];
+let rooms = [{debate_id: 1, numUsers: 0},{debate_id: 2, numUsers: 0},{debate_id: 3, numUsers: 0},{debate_id: 4, numUsers: 0},{debate_id: 5, numUsers: 0}];
+let user_list = [];
 let numUsers = 0;
 
 io.on('connection', (socket) => {
-  let addedUser = false;
-
-  socket.on('make room', (data) => {
-    let room = {
-      question_id: String(data),
-      numUsers: 0,
-    }
-    rooms.push(room);
-    console.log('chat room ' + data + ' added');
-    console.log(rooms);
-  })
+  console.log('client connected : ', socket.id);
 
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
-    console.log(data);
-    let question_id = String(data.question_id);
-    let nickname = data.user_id;
-    let message = data.content;
-
-    let room = rooms.find(v => v.question_id === question_id);
-    let room_num = room.question_id;
-    console.log(room);
-
-    console.log(`${room_num} , ${socket.username} : ${message}`);
-    io.to(room_num).emit('new message', data);
-    // we tell the client to execute 'new message'
-
-    //socket.broadcast.emit('new message', data);
+    let {debate_id, user_id, user_email, message, date} = data;
+    console.log('chat room', debate_id, data);
+    
+    let room = rooms.find(v => v.debate_id == debate_id);
+    io.to(room.debate_id).emit('new message', data);
+    
+    // save to DB
+    const qry = 'insert into chat2 (debate_id, user_id, user_email, message, date) value (?, ?, ?, ?, ?)';
+    db.query(qry, [debate_id, user_id, user_email, message, date], (err, rows) => {
+        if(err) console.log(err);
+        
+    });
   });
 
   // when the client emits 'join room', this listens and executes
   socket.on('join room', (data) => {
-    if(addedUser) return;
+    console.log('user joined room', data);
+    let {debate_id, user_id, user_email, socket_id} = data;
+    let user_alias = debate_id + '_' + user_email;
+    socket.username = user_alias;
 
-    console.log(data);
-    let question_id = (data[0]);
-    let nickname = data[1];
-    socket.username = nickname;
+    if(user_list.find(element => element === user_alias) === undefined){
+      user_list.push(user_alias);
+      console.log('user alias : ', user_alias);
+      console.log('user list', user_list);
+    }
+    else{
+      console.log(user_alias, 'already exist');
+      return;
+    }
 
-    let room = rooms.find(v => v.question_id === question_id);
-    let room_num = room.question_id;
+    let room = rooms.find(v => v.debate_id == debate_id);
     room.numUsers++;
-    console.log('connected : ' + socket.id + ' num : ' + room.numUsers);
-    addedUser = true;
-
-    socket.join(room_num);
-
-    // socket.join('room_num', () => {
-    //   console.log(nickname + ' join room ' + room_num);
-    //   io.to('room_num').emit('join room', data);
-    // })
+    
+    socket.join(room.debate_id);
+    console.log('rooms : ', rooms);
+    console.log('-----------------------------------');
   });
+
+  socket.on('disconnect', () => {
+    console.log('client has disconnected:' + socket.username + ':' + socket.id);
+    let delete_index = user_list.find(element => element === socket.username);
+    if(delete_index){
+      user_list.splice(delete_index, 1);
+      let room_id = socket.username.split('_', 1);
+      let room = rooms.find(v => v.debate_id == room_id);
+      room.numUsers--;
+      console.log(rooms);
+      console.log(user_list);
+    }
+  })
 });

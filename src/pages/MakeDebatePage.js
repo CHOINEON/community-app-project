@@ -8,7 +8,6 @@ import Header1 from "../components/Header1"
 import Input from "../components/Input";
 import axios from "axios";
 import {Navigate} from 'react-router-dom';
-import { socket } from '../socket';
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { ko } from "date-fns/esm/locale";
@@ -70,11 +69,11 @@ function MakeDebatePage(){
     const [serverEndDate, setServerEndDate] = useState('');
     const [dateError, setDateError] = useState(null);
     const [authError, setAuthError] = useState(null);
-    console.log(user);
-    console.log(startDate);
-    console.log(endDate);
-    console.log(serverStartDate);
-    console.log(serverEndDate);
+    // console.log(user);
+    // console.log(startDate);
+    // console.log(endDate);
+    // console.log(serverStartDate);
+    // console.log(serverEndDate);
 
     const filterPassedTime = (time) => {
         const currentDate = new Date();
@@ -104,13 +103,13 @@ function MakeDebatePage(){
         }, {withCredentials: true})
             .then(response => {
                 console.log(response);
-                //setRedirect('/debates/' + response.data.insertId);
+                setRedirect('/debates/' + response.data.insertId);
             });
     }
     useEffect(() => {
         checkAuth()
             .then(() => {
-                console.log(user.seq, user.email);
+                console.log(user);
             })
             .catch(() => {
                 setAuthError('please log in first');

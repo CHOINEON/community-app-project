@@ -16,22 +16,68 @@ DebateRoutes.post('/debates', (req, res) =>{
     })
 });
 
-DebateRoutes.get('/debates/:id', (req, res) => {
-    const question_id = req.params.id;
-    console.log(`Qeustion ${question_id} Detail Request`);
-    
-    db.query('select * from board2 where bid=?', [question_id], (err, rows)=>{
+DebateRoutes.post('/debates/:id/participate', (req, res) =>{
+    const debate_id = req.params.id;
+    let {email} = req.body;
+    console.log(debate_id, email);
+    db.query('select participant from debate where id=?', [debate_id], (err, rows)=>{
         if(err) res.sendStatus(422);
         else{
-            const question = rows[0];
-            //console.log(question);
-            res.json(question);
+            let parti = rows[0].participant;
+            console.log(parti);
+            parti = parti +',' +email;
+            console.log(parti);
+            db.query('update debate set participant=? where id=?', [parti,debate_id], (err, rows)=>{
+                if(err) res.sendStatus(422);
+                else{
+                    console.log(rows);
+                    res.json(parti);
+                }
+            });
+            //res.json(parti);
+        }
+    })
+});
+
+DebateRoutes.post('/debates/:id/cancel', (req, res) =>{
+    const debate_id = req.params.id;
+    let {email} = req.body;
+    console.log('cancel', debate_id, email);
+    db.query('select participant from debate where id=?', [debate_id], (err, rows)=>{
+        if(err) res.sendStatus(422);
+        else{
+            let parti = rows[0].participant;
+            console.log(parti);
+            parti = parti.replace(`,${email}`, '');
+            console.log(parti);
+            db.query('update debate set participant=? where id=?', [parti,debate_id], (err, rows)=>{
+                if(err) res.sendStatus(422);
+                else{
+                    console.log(rows);
+                    res.json(parti);
+                }
+            });
+            //res.json(parti);
+        }
+    })
+});
+
+DebateRoutes.get('/debates/:id', (req, res) => {
+    const debate_id = req.params.id;
+    //console.log(`Debate ${debate_id} Detail Request`);
+    
+    db.query('select * from debate where id=?', [debate_id], (err, rows)=>{
+        if(err) res.sendStatus(422);
+        else{
+            const debate = rows[0];
+            //console.log(debate);
+            res.json(debate);
         }
     })
 });
 
 DebateRoutes.get('/debates', (req, res) => {
-    db.query('select * from board2 order by bid DESC Limit 20', (err, rows) =>{
+    db.query('select * from debate order by id DESC Limit 20', (err, rows) =>{
         if(err) res.sendStatus(422);
         else{
             res.json(rows);

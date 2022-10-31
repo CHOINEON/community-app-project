@@ -10,7 +10,7 @@ const StyledHeader = styled.header`
     background-color: #fafafa;
     box-shadow: 0 3px 3px rgba(0,0,0,.2);
     display: grid;
-    grid-template-columns: 220px 1fr 200px;
+    grid-template-columns: 150px 1fr 200px;
     grid-column-gap: 20px;
 `;
 
@@ -20,7 +20,7 @@ const LogoLink = styled(Link)`
     display: inline-block;
     height: 50px;
     line-height: 30px;
-    padding: 0px 15px;
+    padding-left: 15px;
     svg{
         margin-top: 7px;
         display:inline-block;
@@ -69,13 +69,13 @@ function Header() {
         console.log(redirect);
         navigate(redirect);
     }
-    console.log(searchInput);
-    console.log(redirect);
+    //console.log(searchInput);
+    //console.log(redirect);
     return(
         <StyledHeader>
             <LogoLink to={'/'} className="logo">
                 <FontAwesomeIcon icon={faBars} size="2x" />
-                <span>Test<b>Search</b></span>
+                <span>Test<b>Site</b></span>
             </LogoLink>
             <form action="" className="search" onSubmit={onSearchEnter}>
                 <SearchInput 

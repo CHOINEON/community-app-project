@@ -8,7 +8,6 @@ import Header1 from "../components/Header1"
 import Input from "../components/Input";
 import axios from "axios";
 import {Navigate} from 'react-router-dom';
-import { socket } from '../socket';
 
 import config from '../config';
 import ErrorBox from "../components/ErrorBox";
@@ -50,7 +49,7 @@ function AskPage(){
     useEffect(() => {
         checkAuth()
             .then(() => {
-                console.log(user.seq, user.email);
+                console.log(user);
             })
             .catch(() => {
                 setError('please log in first');

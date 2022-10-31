@@ -61,11 +61,11 @@ const When = styled.div`
     margin-left: 5px;
 `
 
-function ChatBox({id, user_id, message, date, isMyMsg}){
+function ChatBox({id, user_email, message, date, isMyMsg}){
     return(<>
             {isMyMsg && 
                 <ChatWrapper>
-                    <ChatName>{user_id}</ChatName>
+                    <ChatName>{user_email}</ChatName>
                     <ChatMiddleBox>
                         {/* <When>{date}</When> */}
                         <MyChatMessage>{message}</MyChatMessage>
@@ -73,7 +73,7 @@ function ChatBox({id, user_id, message, date, isMyMsg}){
                 </ChatWrapper>}
             {!isMyMsg &&
                 <ChatWrapper>
-                    <MyChatName>{user_id}</MyChatName>
+                    <MyChatName>{user_email}</MyChatName>
                     <ChatMiddleBox>
                         {/* <When>{date}</When> */}
                         <ChatMessage>{message}</ChatMessage>

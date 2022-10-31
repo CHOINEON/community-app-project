@@ -18,7 +18,7 @@ const GlobalStyles = createGlobalStyle`
     margin: 10px 0;
     line-height: 1.5rem;
   }
-  h1,h2{
+  h1,h2,h3{
     margin-top: 20px;
     margin-bottom: 10px;
   }
@@ -30,6 +30,10 @@ const GlobalStyles = createGlobalStyle`
     font-weight: 600;
     font-size: 1.5em;
   }
+  h3{
+    font-weight: 600;
+    font-size: 1.2em;
+  }  
   blockquote{
     background-color: rgba(1,1,1, .1);
     padding: 15px;
