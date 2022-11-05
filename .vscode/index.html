@@ -9,14 +9,21 @@
         example 1-2
 
         <script>
+            function showNotification() {
+                const notification = new Notification("New message from dcode", {
+                    body: "Hey, how are ya? You want to catch up soon?"
+                });
+            }
             //default, granted, denied
             console.log(Notification.permission);
         
-            if(Notification.permision === "granted")
-            { alert("Permission");
+            if(Notification.permision === "granted"){
+                showNotification(); 
             } else if (Notification.permission !== "denied") {
                  Notification.requestPermission().then(permission => {
-                        console.log(permission);
+                       if (permission === "granted") {
+                        showNotification();
+                       }
                 });
             }
             
