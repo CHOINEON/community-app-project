@@ -11,8 +11,13 @@
         <script>
             function showNotification() {
                 const notification = new Notification("토론알리미로부터 새 메시지가 왔습니다", {
-                    body: "예약한 시간이 되었습니다! 토론장으로 갈까요?"
+                    body: "시간이 되었습니다! 토론장으로 갈까요? 클릭하세요",
+                    icon: "/Users/roiii/Desktop/무제 폴더/python workspace/pythhon basic/python_workspace/pygame_project/images"
                 });
+
+                notification.onclick= (e) => {
+                    window.location.href= "https://www.hongik.ac.kr/index.do"
+                }
             }
             //default, granted, denied
             console.log(Notification.permission);
